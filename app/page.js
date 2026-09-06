@@ -233,8 +233,8 @@ export default function HomePage() {
           </div>
           <div className="hero-art">
             <img
-              src="/images/hero.webp"
-              alt="망원경으로 밤하늘을 관찰하는 ASTERA 탐험가와 로봇 친구"
+              src="/images/hero-telescope.webp"
+              alt="랜턴과 망원경 옆에서 밤하늘을 가리키는 ASTERA 탐험가와 로봇, 고양이 친구"
             />
             <div className="scrim" aria-hidden="true" />
           </div>
