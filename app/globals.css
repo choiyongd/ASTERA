@@ -1,11 +1,12 @@
 :root{
-  --navy-deep:#0a0f2b; --navy:#121a44; --navy-2:#1c275c; --nebula:#3a2d6b;
-  --gold:#f0c869; --gold-soft:#f7e6b8;
+  --navy-deep:#071a3d; --navy:#102a52; --navy-2:#1b3a6b; --nebula:#3a2d6b;
+  --gold:#d9a441; --gold-soft:#f3ddb0;
+  --teal:#0d7b66;
   --blue:#3d6bf0; --blue-dark:#2b52c9;
   --bg:#f7f8fc; --ink:#12142b; --muted:#6b6f8a; --card:#ffffff; --line:#e7e9f3;
-  --yellow:#f0c869; --pink:#ffabc3; --green:#5bc2a4; --purple:#9b8afb; --orange:#f0a35e;
+  --yellow:#d9a441; --pink:#ffabc3; --green:#5bc2a4; --purple:#9b8afb; --orange:#f0a35e;
   --shadow:0 14px 40px rgba(18,20,43,.08);
-  --dark-bg:#0a0f2b; --dark-card:#161d47; --dark-line:#26305f; --dark-text:#aab0d6; --dark-accent:#f0c869;
+  --dark-bg:#071a3d; --dark-card:#132a52; --dark-line:#26305f; --dark-text:#aab0d6; --dark-accent:#d9a441;
   --font-display:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;
   --font-body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
   --font-script:"Playfair Display","Noto Serif KR",serif;
@@ -26,7 +27,7 @@ svg{display:block}
 .nav{height:72px;display:flex;align-items:center;justify-content:space-between;gap:16px}
 .brand{display:flex;align-items:center;gap:10px;font-size:19px;color:#fff;font-weight:700;letter-spacing:.2px}
 .brand .word{font-family:var(--font-display)}
-.mark{width:30px;height:30px;border-radius:9px;background:var(--gold);display:grid;place-items:center;flex-shrink:0}
+.mark{width:30px;height:30px;border-radius:9px;object-fit:cover;flex-shrink:0}
 .beta-badge{font-size:11px;font-weight:800;background:rgba(255,255,255,.12);color:#e7e9f7;padding:4px 8px;border-radius:999px;margin-left:2px}
 .navlinks{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
 .navlinks a,.navlinks button{padding:9px 13px;border-radius:999px;font-size:14px;font-weight:600;color:#c7cbea;border:none;background:none;cursor:pointer}
@@ -130,8 +131,11 @@ h1{font-family:var(--font-display);color:#fff;font-size:clamp(38px,5.6vw,62px);l
 .signup button:hover{background:var(--blue-dark)}
 
 footer{padding:38px 0 56px;color:var(--muted)}
-.footerline{border-top:1px solid var(--line);padding-top:22px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:13.5px}
+.footerline{border-top:1px solid var(--line);padding-top:22px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:13.5px;align-items:center}
 .footerline b{font-family:var(--font-display);font-size:15px;color:var(--ink);letter-spacing:.1px}
+.footer-brand{display:flex;align-items:center;gap:10px}
+.footer-brand img{border-radius:6px;flex-shrink:0}
+.footer-tagline{color:var(--teal);font-weight:700}
 
 .toast{position:fixed;right:24px;bottom:24px;background:var(--navy-deep);color:#fff;padding:14px 18px;border-radius:14px;box-shadow:var(--shadow);z-index:50;font-size:14px;font-weight:600}
 .modal{position:fixed;inset:0;background:rgba(10,15,43,.55);display:flex;align-items:center;justify-content:center;padding:22px;z-index:60}

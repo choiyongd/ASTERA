@@ -589,8 +589,11 @@ export default function HomePage() {
 
       <footer>
         <div className="wrap footerline">
-          <div>
-            <b>ASTERA</b> — Discover. Understand. Think. Make.
+          <div className="footer-brand">
+            <img src="/images/astera-mark.png" alt="" aria-hidden="true" width={22} height={22} />
+            <span>
+              <b>ASTERA</b> <span className="footer-tagline">Where questions open worlds.</span>
+            </span>
           </div>
           <div>Beta · 2026</div>
         </div>

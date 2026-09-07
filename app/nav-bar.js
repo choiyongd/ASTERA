@@ -57,11 +57,7 @@ export default function NavBar() {
       <header className="topbar">
         <div className="wrap nav">
           <Link className="brand" href="/">
-            <span className="mark" aria-hidden="true">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                <path d="M12 2l1.8 6.2L20 10l-6.2 1.8L12 18l-1.8-6.2L4 10l6.2-1.8L12 2z" fill="#0a0f2b" />
-              </svg>
-            </span>
+            <img className="mark" src="/images/astera-mark.png" alt="" aria-hidden="true" width={30} height={30} />
             <span className="word">ASTERA</span>
             <span className="beta-badge">BETA</span>
           </Link>
