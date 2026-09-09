@@ -186,8 +186,13 @@ export default function HomePage() {
         <div className="betastrip">ASTERA BETA · 대표 콘텐츠와 서비스 구조를 테스트 중입니다</div>
 
         <section className="hero">
-         <div className="wrap">
-          <div>
+          <img
+            className="hero-banner-img"
+            src="/images/hero-telescope.webp"
+            alt="랜턴과 망원경 옆에서 밤하늘을 가리키는 ASTERA 탐험가와 로봇, 고양이 친구"
+          />
+          <div className="hero-banner-scrim" aria-hidden="true" />
+          <div className="wrap hero-banner-content">
             <span className="eyebrow">
               <span className="dot" /> 7–17세를 위한 세상 탐구 플랫폼 · Beta
             </span>
@@ -232,14 +237,6 @@ export default function HomePage() {
               </button>
             </div>
           </div>
-          <div className="hero-art">
-            <img
-              src="/images/hero-telescope.webp"
-              alt="랜턴과 망원경 옆에서 밤하늘을 가리키는 ASTERA 탐험가와 로봇, 고양이 친구"
-            />
-            <div className="scrim" aria-hidden="true" />
-          </div>
-         </div>
         </section>
 
         <section className="wrap">
