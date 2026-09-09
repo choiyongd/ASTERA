@@ -39,7 +39,7 @@ svg{display:block}
 .betastrip{background:var(--navy-2);color:#e7e9f7;font-size:12px;font-weight:700;text-align:center;padding:9px 16px;letter-spacing:.2px}
 
 .hero{position:relative;background:var(--navy-deep);border-radius:0 0 32px 32px;overflow:hidden;aspect-ratio:2.15/1;min-height:420px}
-.hero-banner-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:22% 45%}
+.hero-banner-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:62% 42%}
 .hero-banner-scrim{position:absolute;inset:0;background:linear-gradient(100deg,rgba(7,26,61,.95) 0%,rgba(7,26,61,.88) 32%,rgba(7,26,61,.5) 56%,rgba(7,26,61,.08) 78%,rgba(7,26,61,0) 100%)}
 .hero-banner-content{position:relative;z-index:1;height:100%;display:flex;flex-direction:column;justify-content:center;padding:32px 0}
 .eyebrow{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:#e7c98a;padding:8px 13px;border-radius:999px;font-size:13px;font-weight:700;align-self:flex-start}
@@ -201,7 +201,7 @@ footer{padding:38px 0 56px;color:var(--muted)}
   .hero{aspect-ratio:auto;min-height:0}
   .hero-banner-content{padding:44px 0}
   .hero-banner-scrim{background:linear-gradient(180deg,rgba(7,26,61,.55) 0%,rgba(7,26,61,.85) 55%,rgba(7,26,61,.97) 100%)}
-  .hero-banner-img{object-position:65% 30%}
+  .hero-banner-img{object-position:68% 35%}
 }
 @media(max-width:580px){
   .grid,.universe,.product-grid{grid-template-columns:1fr}
