@@ -188,8 +188,8 @@ export default function HomePage() {
         <section className="hero">
           <img
             className="hero-banner-img"
-            src="/images/hero-earth.webp"
-            alt="등대와 노을 진 해안 도시 너머로 떠 있는 지구를 로봇 친구와 함께 바라보는 ASTERA 탐험가"
+            src="/images/hero-shootingstar.webp"
+            alt="유성과 보름달이 뜬 밤하늘을 가리키며 로봇 친구와 천문대 담벼락에 앉아 있는 ASTERA 탐험가"
           />
           <div className="hero-banner-scrim" aria-hidden="true" />
           <div className="wrap hero-banner-content">
