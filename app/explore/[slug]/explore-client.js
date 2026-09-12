@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { IconBookmark, IconShare, IconCheck } from "../../icons";
+import { UniverseIcon } from "../../universe-icons";
 import { EXPLORE_ITEMS, JOURNEY_STEPS, LAB_TOOLS } from "@/lib/content";
 
 const TABS = ["소개", "미리보기", "학습 목표", "교사용 자료", "관련 콘텐츠"];
@@ -75,7 +76,7 @@ export default function ExploreClient({ item }) {
 
         <div>
           <div className="explore-hero">
-            <span className="code">{item.code}</span>
+            <span className="code">ASTERA {item.code}</span>
             <h1>{item.title}</h1>
             <p>{item.subtitle}</p>
             <div className="explore-tags">
@@ -140,9 +141,10 @@ export default function ExploreClient({ item }) {
 
           <div id="steps" className="step-grid">
             {item.steps.map((s) => (
-              <div key={s.n} className="step-card">
-                <div className="thumb">
-                  <img src={s.image} alt="" />
+              <div key={s.n} className={`step-card tint-${item.universe.toLowerCase()} cv-${s.n % 4}`}>
+                <div className="step-figure">
+                  <span className="step-n">{String(s.n).padStart(2, "0")}</span>
+                  <UniverseIcon name={item.universe} size={92} className="step-glyph" />
                 </div>
                 <div className="sc-body">
                   <div className="sc-label">{s.n}. {s.label}</div>
