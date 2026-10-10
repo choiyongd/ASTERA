@@ -181,6 +181,8 @@ export default function HomePage() {
             className="hero-banner-img"
             src="/images/hero-shootingstar.webp"
             alt="유성과 보름달이 뜬 밤하늘을 가리키며 로봇 친구와 천문대 담벼락에 앉아 있는 ASTERA 탐험가"
+            width={1536}
+            height={1024}
           />
           <div className="hero-banner-scrim" aria-hidden="true" />
           <div className="wrap hero-banner-content">
@@ -207,6 +209,7 @@ export default function HomePage() {
               <IconSearch width={18} height={18} />
               <input
                 id="hero-search"
+                aria-label="탐구 질문 검색"
                 type="text"
                 placeholder="무엇이 궁금한가요?"
                 value={query}
@@ -217,12 +220,10 @@ export default function HomePage() {
               </button>
             </form>
             <div className="hero-actions">
-              <button className="primary" onClick={goToLibrary}>
-                오늘의 질문 보기 →
-              </button>
-              <Link className="secondary" href={`/explore/${EXPLORE_ITEMS[0].slug}`}>
-                대표 콘텐츠 체험
+              <Link className="primary" href="/lab/science-001">
+                무료 생명 탐사 LAB →
               </Link>
+              <button className="secondary" onClick={goToLibrary}>질문 둘러보기</button>
             </div>
           </div>
         </section>
@@ -246,6 +247,12 @@ export default function HomePage() {
               </button>
             ))}
           </div>
+        </section>
+
+        <section className="wrap home-lab-entry" aria-labelledby="home-lab-title">
+          <div className="home-lab-code"><span>ASTERA LAB</span><b>SCIENCE 001</b></div>
+          <div><h2 id="home-lab-title">오늘은, 생명 탐사자.</h2><p>5–10분 동안 행성의 단서를 조사하고, 나의 생각을 근거로 설명해보세요.</p></div>
+          <Link className="home-lab-link" href="/lab">8개 유니버스의 LAB 보기 <IconArrow width={17} height={17} /></Link>
         </section>
 
         <section className="wrap section">
@@ -303,7 +310,7 @@ export default function HomePage() {
 
           <div className="lib-toolbar">
             <div className="filter-row">
-              <span className="filter-label">분야</span>
+              <span className="filter-label">활동</span>
               {TYPES.map((t) => (
                 <button key={t.id} className={`tab${typeFilter === t.id ? " active" : ""}`} onClick={() => setTypeFilter(t.id)}>
                   {t.label}

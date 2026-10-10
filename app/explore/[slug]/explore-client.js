@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { IconBookmark, IconShare, IconCheck } from "../../icons";
 import { UniverseIcon } from "../../universe-icons";
-import { EXPLORE_ITEMS, JOURNEY_STEPS, LAB_TOOLS } from "@/lib/content";
+import { EXPLORE_ITEMS, JOURNEY_STEPS } from "@/lib/content";
 
 const TABS = ["소개", "미리보기", "학습 목표", "교사용 자료", "관련 콘텐츠"];
 
@@ -161,17 +161,13 @@ export default function ExploreClient({ item }) {
                 <h3>ASTERA LAB</h3>
                 <p>직접 해보는 인터랙티브 탐구 공간</p>
               </div>
-              <button className="icon-pill active" onClick={() => showToast("ASTERA LAB은 다음 업데이트에서 열릴 예정이에요")}>
-                LAB 시작하기 →
-              </button>
+              <Link className="icon-pill active" href={item.slug === "alone-in-universe" ? "/lab/science-001" : "/lab"}>
+                {item.slug === "alone-in-universe" ? "생명 탐사 시작하기 →" : "LAB 둘러보기 →"}
+              </Link>
             </div>
             <div className="lab-tools">
-              {LAB_TOOLS.map((tool) => (
-                <button key={tool.name} className="lab-tool" onClick={() => showToast(`${tool.name}은 준비 중이에요`)}>
-                  <b>{tool.name}</b>
-                  <span>{tool.kr}</span>
-                </button>
-              ))}
+              <Link className="lab-tool" href="/lab/science-001"><b>LIFE FINDER · SCIENCE 001</b><span>행성 선택 → 조사 계획 → 근거 비교 · 5–10분</span></Link>
+              <Link className="lab-tool" href="/lab"><b>8개 유니버스의 LAB</b><span>체험 가능한 활동과 다음 개발 주제를 확인해요.</span></Link>
             </div>
           </div>
         </div>
