@@ -15,12 +15,18 @@ export default function NavBar() {
   const router = useRouter();
 
   useEffect(() => {
+    // Public LAB activities must work even before auth configuration is installed.
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+      setUser(null);
+      return;
+    }
+    let active = true;
     const supabase = createClient();
-    supabase.auth.getUser().then(({ data }) => setUser(data.user ?? null));
+    supabase.auth.getUser().then(({ data }) => { if (active) setUser(data.user ?? null); }).catch(() => { if (active) setUser(null); });
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
+      if (active) setUser(session?.user ?? null);
     });
-    return () => sub.subscription.unsubscribe();
+    return () => { active = false; sub.subscription.unsubscribe(); };
   }, []);
 
   useEffect(() => {
@@ -45,26 +51,28 @@ export default function NavBar() {
   }
 
   const NAV_LINKS = [
+    { href: "/about", label: "ASTERA 소개" },
     { href: "/#discover", label: "탐험하기" },
     { href: "/#universes", label: "유니버스" },
+    { href: "/lab", label: "ASTERA LAB" },
     { href: "/#products", label: "학습도구" },
     { href: "/#community", label: "커뮤니티" },
     { href: "/pricing", label: "요금제" },
   ];
+  const isCurrent = (href) => href === "/lab" ? pathname.startsWith("/lab") : pathname === href;
 
   return (
     <>
       <header className="topbar">
         <div className="wrap nav">
-          <Link className="brand" href="/">
-            <img className="mark" src="/images/astera-mark.png" alt="" aria-hidden="true" width={30} height={30} />
-            <span className="word">ASTERA</span>
+          <Link className="brand" href="/" aria-label="ASTERA 홈">
+            <img className="brand-logo" src="/brand/astera_logo_reversed_transparent.png" alt="ASTERA" width={160} height={36} />
             <span className="beta-badge">BETA</span>
           </Link>
 
-          <nav className="navlinks">
+          <nav className="navlinks" aria-label="상단 메뉴">
             {NAV_LINKS.map((l) => (
-              <Link key={l.label} href={l.href}>
+              <Link key={l.label} href={l.href} aria-current={isCurrent(l.href) ? "page" : undefined}>
                 {l.label}
               </Link>
             ))}
@@ -107,16 +115,16 @@ export default function NavBar() {
               </>
             )}
 
-            <button className="icon-btn menu-btn" aria-label="메뉴" onClick={() => setMenuOpen((v) => !v)}>
+            <button className="icon-btn menu-btn" aria-label="메뉴" aria-expanded={menuOpen} aria-controls="mobile-menu" onClick={() => setMenuOpen((v) => !v)}>
               {menuOpen ? <IconClose width={19} height={19} /> : <IconMenu width={19} height={19} />}
             </button>
           </div>
         </div>
 
         {menuOpen && (
-          <div className="mobile-menu">
+          <div className="mobile-menu" id="mobile-menu">
             {NAV_LINKS.map((l) => (
-              <Link key={l.label} href={l.href} onClick={() => setMenuOpen(false)}>
+              <Link key={l.label} href={l.href} aria-current={isCurrent(l.href) ? "page" : undefined} onClick={() => setMenuOpen(false)}>
                 {l.label}
               </Link>
             ))}
@@ -144,9 +152,9 @@ export default function NavBar() {
           <IconHome width={20} height={20} />
           <span>홈</span>
         </Link>
-        <Link href="/#discover">
+        <Link href="/lab" className={pathname.startsWith("/lab") ? "active" : ""} aria-current={pathname.startsWith("/lab") ? "page" : undefined}>
           <IconCompass width={20} height={20} />
-          <span>탐험하기</span>
+          <span>LAB</span>
         </Link>
         <Link href="/account" className={pathname === "/account" ? "active" : ""}>
           <IconCheck width={20} height={20} />

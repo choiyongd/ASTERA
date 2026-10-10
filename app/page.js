@@ -1,8 +1,11 @@
 "use client";
 
+import { filterLibrary } from "@/lib/library-search.mjs";
+
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import NavBar from "./nav-bar";
+import BrandFooter from "./brand-footer";
 import RadarChart from "./radar-chart";
 import ContentTile from "./content-tile";
 import { UNIVERSES, UniverseIcon } from "./universe-icons";
@@ -148,24 +151,15 @@ export default function HomePage() {
 
   const featured = EXPLORE_ITEMS.slice(0, 4);
 
-  const libraryItems = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return EXPLORE_ITEMS.filter((item) => {
-      if (typeFilter !== "all" && item.type !== typeFilter) return false;
-      if (ageFilter !== "전체" && item.ageGroup !== ageFilter) return false;
-      if (universeFilter && item.universe !== universeFilter) return false;
-      if (q && !`${item.title} ${item.summary} ${item.tags.join(" ")} ${item.universeKr}`.toLowerCase().includes(q)) return false;
-      return true;
-    });
-  }, [typeFilter, ageFilter, universeFilter, query]);
+  const libraryItems = useMemo(() => filterLibrary(EXPLORE_ITEMS, { query, type: typeFilter, age: ageFilter, universe: universeFilter }), [typeFilter, ageFilter, universeFilter, query]);
 
   const radarValues = useMemo(() => {
     const counts = UNIVERSES.map((u) => EXPLORE_ITEMS.filter((i) => i.universe === u.name && saved.includes(i.slug)).length);
     const max = Math.max(2, ...counts);
     return counts.map((c) => c / max);
   }, [saved]);
-
   const hasSaved = saved.length > 0;
+
   const filtersActive = typeFilter !== "all" || ageFilter !== "전체" || universeFilter || query.trim();
   // 필터가 없을 때는 그리드가 꽉 찬 줄로 끝나도록 8개만 먼저 보여줍니다.
   const visibleItems = filtersActive || showAll ? libraryItems : libraryItems.slice(0, 8);
@@ -181,6 +175,8 @@ export default function HomePage() {
             className="hero-banner-img"
             src="/images/hero-shootingstar.webp"
             alt="유성과 보름달이 뜬 밤하늘을 가리키며 로봇 친구와 천문대 담벼락에 앉아 있는 ASTERA 탐험가"
+            width={1536}
+            height={1024}
           />
           <div className="hero-banner-scrim" aria-hidden="true" />
           <div className="wrap hero-banner-content">
@@ -207,6 +203,7 @@ export default function HomePage() {
               <IconSearch width={18} height={18} />
               <input
                 id="hero-search"
+                aria-label="탐구 질문 검색"
                 type="text"
                 placeholder="무엇이 궁금한가요?"
                 value={query}
@@ -217,12 +214,10 @@ export default function HomePage() {
               </button>
             </form>
             <div className="hero-actions">
-              <button className="primary" onClick={goToLibrary}>
-                오늘의 질문 보기 →
-              </button>
-              <Link className="secondary" href={`/explore/${EXPLORE_ITEMS[0].slug}`}>
-                대표 콘텐츠 체험
+              <Link className="primary" href="/lab/science-001">
+                무료 생명 탐사 LAB →
               </Link>
+              <button className="secondary" onClick={goToLibrary}>질문 둘러보기</button>
             </div>
           </div>
         </section>
@@ -239,13 +234,19 @@ export default function HomePage() {
                 }}
               >
                 <span className="qicon">
-                  <UniverseIcon name={u.name} size={18} />
+                  <UniverseIcon name={u.name} size={40} />
                 </span>
                 <b>{u.name}</b>
                 <span>{u.kr}</span>
               </button>
             ))}
           </div>
+        </section>
+
+        <section className="wrap home-lab-entry" aria-labelledby="home-lab-title">
+          <div className="home-lab-code"><span>ASTERA LAB</span><b>SCIENCE 001</b></div>
+          <div><h2 id="home-lab-title">오늘은, 생명 탐사자.</h2><p>5–10분 동안 행성의 단서를 조사하고, 나의 생각을 근거로 설명해보세요.</p></div>
+          <Link className="home-lab-link" href="/lab">8개 유니버스의 LAB 보기 <IconArrow width={17} height={17} /></Link>
         </section>
 
         <section className="wrap section">
@@ -302,8 +303,13 @@ export default function HomePage() {
           </div>
 
           <div className="lib-toolbar">
+            <div className="library-search">
+              <label htmlFor="library-search">주제 검색</label>
+              <div><IconSearch width={20} height={20} /><input id="library-search" type="search" placeholder="주제명 또는 키워드 검색 · 예: 알고리즘, HISTORY 001" value={query} onChange={(event) => { setQuery(event.target.value); setShowAll(false); }} aria-controls="library-results" />{query && <button type="button" aria-label="검색어 지우기" onClick={() => setQuery("")}><IconClose width={18} height={18} /></button>}</div>
+              <p role="status" aria-live="polite">{query.trim() ? `검색 결과 ${libraryItems.length}개` : "궁금한 질문을 검색하거나 아래 필터로 찾아보세요."}</p>
+            </div>
             <div className="filter-row">
-              <span className="filter-label">분야</span>
+              <span className="filter-label">활동</span>
               {TYPES.map((t) => (
                 <button key={t.id} className={`tab${typeFilter === t.id ? " active" : ""}`} onClick={() => setTypeFilter(t.id)}>
                   {t.label}
@@ -335,7 +341,7 @@ export default function HomePage() {
           </div>
 
           {libraryItems.length === 0 ? (
-            <div className="lib-empty">
+            <div className="lib-empty" id="library-results">
               <p>조건에 맞는 질문이 아직 없어요.</p>
               <button
                 className="secondary dark"
@@ -350,7 +356,7 @@ export default function HomePage() {
               </button>
             </div>
           ) : (
-            <div className="lib-grid">
+            <div className="lib-grid" id="library-results">
               {visibleItems.map((item) => {
                 const isSaved = saved.includes(item.slug);
                 return (
@@ -459,7 +465,7 @@ export default function HomePage() {
                 }}
               >
                 <i>
-                  <UniverseIcon name={u.name} size={18} />
+                  <UniverseIcon name={u.name} size={44} />
                 </i>
                 <b>
                   {u.name} <span>· {u.kr}</span>
@@ -587,17 +593,7 @@ export default function HomePage() {
         </section>
       </main>
 
-      <footer>
-        <div className="wrap footerline">
-          <div className="footer-brand">
-            <img src="/images/astera-mark.png" alt="" aria-hidden="true" width={22} height={22} />
-            <span>
-              <b>ASTERA</b> <span className="footer-tagline">Where questions open worlds.</span>
-            </span>
-          </div>
-          <div>Beta · 2026</div>
-        </div>
-      </footer>
+      <BrandFooter />
 
       {toast && <div className="toast">{toast}</div>}
 

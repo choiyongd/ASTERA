@@ -1,4 +1,8 @@
 import "./globals.css";
+import "./brand-intro.css";
+import "./site-motion.css";
+import BrandIntro from "./brand-intro";
+import SiteMotion from "./site-motion";
 
 export const metadata = {
   title: "ASTERA — 궁금함이 배움이 되는 곳",
@@ -17,11 +21,11 @@ export default function RootLayout({ children }) {
           crossOrigin="anonymous"
         />
         <link
-          href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Playfair+Display:ital@1&family=Noto+Serif+KR:wght@500&display=swap"
+          href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Playfair+Display:ital@1&family=Noto+Serif+KR:wght@500;700&family=Cormorant+Garamond:wght@600&display=swap"
           rel="stylesheet"
         />
       </head>
-      <body>{children}</body>
+      <body><BrandIntro><SiteMotion>{children}</SiteMotion></BrandIntro></body>
     </html>
   );
 }
