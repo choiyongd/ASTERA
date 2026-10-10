@@ -10,9 +10,8 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="ko" suppressHydrationWarning>
+    <html lang="ko">
       <head>
-        <script dangerouslySetInnerHTML={{ __html: "try{if(sessionStorage.getItem('astera:brand-intro:v1')==='seen')document.documentElement.dataset.asteraIntroSeen='true'}catch(e){}" }} />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"

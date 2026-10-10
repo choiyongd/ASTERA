@@ -1,5 +1,7 @@
 "use client";
 
+import { filterLibrary } from "@/lib/library-search.mjs";
+
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import NavBar from "./nav-bar";
@@ -149,24 +151,15 @@ export default function HomePage() {
 
   const featured = EXPLORE_ITEMS.slice(0, 4);
 
-  const libraryItems = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return EXPLORE_ITEMS.filter((item) => {
-      if (typeFilter !== "all" && item.type !== typeFilter) return false;
-      if (ageFilter !== "전체" && item.ageGroup !== ageFilter) return false;
-      if (universeFilter && item.universe !== universeFilter) return false;
-      if (q && !`${item.title} ${item.summary} ${item.tags.join(" ")} ${item.universeKr}`.toLowerCase().includes(q)) return false;
-      return true;
-    });
-  }, [typeFilter, ageFilter, universeFilter, query]);
+  const libraryItems = useMemo(() => filterLibrary(EXPLORE_ITEMS, { query, type: typeFilter, age: ageFilter, universe: universeFilter }), [typeFilter, ageFilter, universeFilter, query]);
 
   const radarValues = useMemo(() => {
     const counts = UNIVERSES.map((u) => EXPLORE_ITEMS.filter((i) => i.universe === u.name && saved.includes(i.slug)).length);
     const max = Math.max(2, ...counts);
     return counts.map((c) => c / max);
   }, [saved]);
-
   const hasSaved = saved.length > 0;
+
   const filtersActive = typeFilter !== "all" || ageFilter !== "전체" || universeFilter || query.trim();
   // 필터가 없을 때는 그리드가 꽉 찬 줄로 끝나도록 8개만 먼저 보여줍니다.
   const visibleItems = filtersActive || showAll ? libraryItems : libraryItems.slice(0, 8);
@@ -310,6 +303,11 @@ export default function HomePage() {
           </div>
 
           <div className="lib-toolbar">
+            <div className="library-search">
+              <label htmlFor="library-search">주제 검색</label>
+              <div><IconSearch width={20} height={20} /><input id="library-search" type="search" placeholder="주제명 또는 키워드 검색 · 예: 알고리즘, HISTORY 001" value={query} onChange={(event) => { setQuery(event.target.value); setShowAll(false); }} aria-controls="library-results" />{query && <button type="button" aria-label="검색어 지우기" onClick={() => setQuery("")}><IconClose width={18} height={18} /></button>}</div>
+              <p role="status" aria-live="polite">{query.trim() ? `검색 결과 ${libraryItems.length}개` : "궁금한 질문을 검색하거나 아래 필터로 찾아보세요."}</p>
+            </div>
             <div className="filter-row">
               <span className="filter-label">활동</span>
               {TYPES.map((t) => (
@@ -343,7 +341,7 @@ export default function HomePage() {
           </div>
 
           {libraryItems.length === 0 ? (
-            <div className="lib-empty">
+            <div className="lib-empty" id="library-results">
               <p>조건에 맞는 질문이 아직 없어요.</p>
               <button
                 className="secondary dark"
@@ -358,7 +356,7 @@ export default function HomePage() {
               </button>
             </div>
           ) : (
-            <div className="lib-grid">
+            <div className="lib-grid" id="library-results">
               {visibleItems.map((item) => {
                 const isSaved = saved.includes(item.slug);
                 return (

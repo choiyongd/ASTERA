@@ -2,68 +2,64 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-const SESSION_KEY = "astera:brand-intro:v1";
-
 export default function BrandIntro({ children }) {
-  const [visible, setVisible] = useState(true);
-  const [blocking, setBlocking] = useState(false);
-  const introRef = useRef(null);
+  const [phase, setPhase] = useState("fallback");
+  const [imageFailed, setImageFailed] = useState(false);
+  const phaseRef = useRef(phase);
+  const logoRef = useRef(null);
   const contentRef = useRef(null);
-  const shouldPlayRef = useRef(null);
+  const readyTimer = useRef(null);
+  phaseRef.current = phase;
 
   const finish = useCallback(() => {
-    setVisible(false);
-    setBlocking(false);
+    window.clearTimeout(readyTimer.current);
+    setPhase("done");
   }, []);
-
+  const start = useCallback(() => {
+    window.clearTimeout(readyTimer.current);
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) finish();
+    else setPhase("playing");
+  }, [finish]);
+  const prepare = useCallback(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) { finish(); return; }
+    setPhase("waiting");
+    if (logoRef.current?.complete && logoRef.current?.naturalWidth > 0) start();
+    else readyTimer.current = window.setTimeout(() => {
+      setImageFailed(!logoRef.current?.naturalWidth);
+      start();
+    }, 1200);
+  }, [finish, start]);
   const skip = useCallback(() => {
     finish();
-    // Return keyboard users to the page rather than to a removed skip button.
     requestAnimationFrame(() => contentRef.current?.focus({ preventScroll: true }));
   }, [finish]);
 
   useEffect(() => {
-    // Cache this mount's decision so React's development effect replay is safe.
-    if (shouldPlayRef.current === null) {
-      let seen = false;
-      try {
-        seen = window.sessionStorage.getItem(SESSION_KEY) === "seen";
-        window.sessionStorage.setItem(SESSION_KEY, "seen");
-      } catch {
-        // The root layout still prevents repeats during navigation without storage.
-      }
-      shouldPlayRef.current = !seen && !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    }
-    if (!shouldPlayRef.current) {
-      finish();
-      return;
-    }
+    // Every full page load plays; client-side navigation keeps this root mounted.
+    prepare();
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const onPreference = () => { if (media.matches) finish(); };
+    window.addEventListener("astera:replay-intro", prepare);
+    media.addEventListener("change", onPreference);
+    return () => {
+      window.clearTimeout(readyTimer.current);
+      window.removeEventListener("astera:replay-intro", prepare);
+      media.removeEventListener("change", onPreference);
+    };
+  }, [prepare, finish]);
 
-    // Slow hydration must not block a page after its CSS intro has already ended.
-    const overlay = introRef.current;
-    if (!overlay || window.getComputedStyle(overlay).visibility === "hidden") {
-      finish();
-      return;
-    }
-    const animation = overlay.getAnimations?.().find((item) => item.animationName === "brand-intro-exit");
-    const elapsed = typeof animation?.currentTime === "number" ? animation.currentTime : 0;
-
-    setBlocking(true);
-    // CSS also ends the overlay at two seconds, including before hydration.
-    const timer = window.setTimeout(finish, Math.max(0, 2000 - elapsed));
+  useEffect(() => {
+    if (phase !== "playing") return;
+    const timer = window.setTimeout(finish, 2000);
     return () => window.clearTimeout(timer);
-  }, [finish]);
+  }, [phase, finish]);
 
+  const blocking = phase === "waiting" || phase === "playing";
   useEffect(() => {
     if (!blocking) return;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    const onKeyDown = (event) => {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        skip();
-      }
-    };
+    const onKeyDown = (event) => { if (event.key === "Escape") { event.preventDefault(); skip(); } };
     window.addEventListener("keydown", onKeyDown);
     return () => {
       document.body.style.overflow = previousOverflow;
@@ -71,20 +67,17 @@ export default function BrandIntro({ children }) {
     };
   }, [blocking, skip]);
 
-  return (
-    <>
-      {visible && (
-        <div ref={introRef} className="brand-intro" onAnimationEnd={(event) => {
-          if (event.target === event.currentTarget && event.animationName === "brand-intro-exit") finish();
-        }}>
-          <div className="brand-intro-center" role="status" aria-live="off">
-            <img className="brand-intro-logo" src="/brand/astera_logo_reversed_transparent.png" alt="ASTERA · Where Questions Open Worlds" width={800} height={180} fetchPriority="high" />
-            <p className="brand-intro-tagline"><span>질문에서,</span><br /><span>세상이 시작됩니다.</span></p>
-          </div>
-          <button className="brand-intro-skip" type="button" onClick={skip}>건너뛰기 <span aria-hidden="true">→</span></button>
-        </div>
-      )}
-      <div ref={contentRef} className="site-content" tabIndex={-1} inert={blocking || undefined}>{children}</div>
-    </>
-  );
+  return <>
+    <div className="brand-intro" data-phase={phase} aria-hidden={phase === "done" ? "true" : undefined} onAnimationEnd={(event) => {
+      if (event.target === event.currentTarget && event.animationName === "brand-intro-exit") finish();
+    }}>
+      <div className="brand-intro-center" role="status" aria-live="off">
+        <img ref={logoRef} className="brand-intro-logo" src="/brand/astera_logo_reversed_transparent.png" alt="ASTERA · Where Questions Open Worlds" width={800} height={180} fetchPriority="high" style={imageFailed ? { display: "none" } : undefined} onLoad={() => { setImageFailed(false); if (phaseRef.current === "waiting") start(); }} onError={() => { setImageFailed(true); if (phaseRef.current === "waiting") start(); }} />
+        {imageFailed && <div className="brand-intro-wordmark">ASTERA</div>}
+        <p className="brand-intro-tagline"><span>질문에서,</span><br /><span>세상이 시작됩니다.</span></p>
+      </div>
+      <button className="brand-intro-skip" type="button" onClick={skip}>건너뛰기 <span aria-hidden="true">→</span></button>
+    </div>
+    <div ref={contentRef} className="site-content" tabIndex={-1} inert={blocking || undefined}>{children}</div>
+  </>;
 }

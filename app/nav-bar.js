@@ -52,9 +52,9 @@ export default function NavBar() {
 
   const NAV_LINKS = [
     { href: "/about", label: "ASTERA 소개" },
-    { href: "/lab", label: "ASTERA LAB" },
     { href: "/#discover", label: "탐험하기" },
     { href: "/#universes", label: "유니버스" },
+    { href: "/lab", label: "ASTERA LAB" },
     { href: "/#products", label: "학습도구" },
     { href: "/#community", label: "커뮤니티" },
     { href: "/pricing", label: "요금제" },

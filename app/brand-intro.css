@@ -1,4 +1,4 @@
-.brand-intro{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;background:#071a3d;color:#f7f2e8;animation:brand-intro-exit 2s linear both}
+.brand-intro{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;background:#071a3d;color:#f7f2e8;animation:brand-intro-fallback-exit 2s linear both}
 .brand-intro-center{text-align:center;width:100%;padding:32px 22px}
 .brand-intro-logo{display:block;width:min(420px,80vw);height:auto;margin:0 auto;animation:brand-intro-appear .35s ease-out both}
 .brand-intro-tagline{font-family:"Noto Serif KR",serif;font-weight:700;font-size:clamp(25px,4.5vw,38px);line-height:1.65;letter-spacing:-.04em;margin:34px 0 0}
@@ -9,8 +9,17 @@
 .brand-intro-skip:hover{background:#ffffff12}
 .brand-intro-skip:focus-visible{outline:2px solid #f3ddb0;outline-offset:4px}
 .site-content:focus{outline:none}
-html[data-astera-intro-seen="true"] .brand-intro{display:none}
+.brand-intro[data-phase="waiting"]{animation:none}
+.brand-intro[data-phase="waiting"] :is(.brand-intro-logo,.brand-intro-wordmark,.brand-intro-tagline span){animation:none;opacity:0}
+.brand-intro[data-phase="playing"]{animation:brand-intro-exit 2s linear both}
+.brand-intro[data-phase="playing"] :is(.brand-intro-logo,.brand-intro-wordmark){animation:brand-intro-logo-play .35s ease-out both}
+.brand-intro[data-phase="playing"] .brand-intro-tagline span{animation-name:brand-intro-type-play}
+.brand-intro[data-phase="done"]{display:none}
+.brand-intro-wordmark{font-family:"Cormorant Garamond",serif;font-weight:600;font-size:60px;letter-spacing:.09em;animation:brand-intro-appear .35s ease-out both}
+@keyframes brand-intro-fallback-exit{0%,90%{opacity:1;visibility:visible}100%{opacity:0;visibility:hidden;pointer-events:none}}
 @keyframes brand-intro-appear{from{opacity:0}to{opacity:1}}
+@keyframes brand-intro-logo-play{from{opacity:0}to{opacity:1}}
+@keyframes brand-intro-type-play{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 @keyframes brand-intro-type{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 @keyframes brand-intro-exit{0%,90%{opacity:1;visibility:visible}100%{opacity:0;visibility:hidden;pointer-events:none}}
 @media(prefers-reduced-motion:reduce){.brand-intro{display:none}.brand-intro,.brand-intro *{animation:none!important}}

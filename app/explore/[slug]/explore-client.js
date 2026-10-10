@@ -86,14 +86,7 @@ export default function ExploreClient({ item }) {
               <span>{item.ageGroup}</span>
             </div>
             <div className="explore-actions">
-              <button
-                className="primary"
-                onClick={() => {
-                  document.getElementById("steps")?.scrollIntoView({ behavior: "smooth" });
-                }}
-              >
-                학습 시작하기
-              </button>
+              <Link className="primary" href={`/lab/${item.labId}`}>학습 시작하기</Link>
               <button className={`icon-pill${bookmarked ? " active" : ""}`} onClick={toggleBookmark}>
                 <IconBookmark width={16} height={16} /> {bookmarked ? "찜 완료" : "찜하기"}
               </button>
@@ -161,13 +154,13 @@ export default function ExploreClient({ item }) {
                 <h3>ASTERA LAB</h3>
                 <p>직접 해보는 인터랙티브 탐구 공간</p>
               </div>
-              <Link className="icon-pill active" href={item.slug === "alone-in-universe" ? "/lab/science-001" : "/lab"}>
-                {item.slug === "alone-in-universe" ? "생명 탐사 시작하기 →" : "LAB 둘러보기 →"}
+              <Link className="icon-pill active" href={`/lab/${item.labId}`}>
+                이 주제 탐구 시작하기 →
               </Link>
             </div>
             <div className="lab-tools">
-              <Link className="lab-tool" href="/lab/science-001"><b>LIFE FINDER · SCIENCE 001</b><span>행성 선택 → 조사 계획 → 근거 비교 · 5–10분</span></Link>
-              <Link className="lab-tool" href="/lab"><b>8개 유니버스의 LAB</b><span>체험 가능한 활동과 다음 개발 주제를 확인해요.</span></Link>
+              <Link className="lab-tool" href={`/lab/${item.labId}`}><b>{item.labTool} · {item.code}</b><span>예측 → 비교 → 근거 정리 → 새로운 생각</span></Link>
+              <Link className="lab-tool" href="/lab"><b>8개 유니버스의 LAB</b><span>모든 주제의 탐구 도구를 만나보세요.</span></Link>
             </div>
           </div>
         </div>
