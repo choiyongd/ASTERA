@@ -104,7 +104,7 @@ export default function ExploreClient({ item }) {
             ))}
           </div>
 
-          <div className="explore-panel">
+          <div className="explore-panel" key={tab}>
             {tab === "소개" && <p>{item.intro}</p>}
             {tab === "미리보기" && <p>{item.preview}</p>}
             {tab === "학습 목표" && (

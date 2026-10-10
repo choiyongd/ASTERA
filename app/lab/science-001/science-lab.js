@@ -139,7 +139,7 @@ export default function ScienceLab() {
             <div className="lab-workspace-heading"><div><p className="lab-kicker">{String(mission.step + 1).padStart(2, "0")} / {mission.completed && mission.step === 4 ? "EXPLORATION RECORD" : LAB_STEPS[mission.step].label}</p><h2 ref={headingRef} tabIndex={-1}>{mission.completed && mission.step === 4 ? "나의 생명 탐사 기록" : LAB_STEPS[mission.step].title}</h2></div>{mission.step === 2 && <div className="lab-budget" aria-label={`탐사 토큰 ${BUDGET}개 중 ${balance}개 남음`}><small>남은 탐사 토큰</small><strong>{balance}<span> / {BUDGET}</span></strong><div aria-hidden="true">{Array.from({ length: BUDGET }, (_, index) => <i key={index} className={index < balance ? "available" : ""} />)}</div></div>}</div>
             <div className="lab-announcement" role="status">{message}</div>
             {saveState === "unavailable" && <p className="lab-warning">새로고침하면 기록이 사라질 수 있어요. 활동을 마치고 탐구 기록을 파일로 저장해주세요.</p>}
-            {!loaded ? <p>탐구 기록을 준비하고 있어요…</p> : <>
+            {!loaded ? <p>탐구 기록을 준비하고 있어요…</p> : <div key={mission.step} className="lab-step-content">
               {mission.step === 0 && <>
                 <div className="lab-question-scene"><img src="/images/hero-earth.webp" alt="큰 지구와 밤하늘을 바라보는 ASTERA 탐험가와 탐구 파트너" width={2000} height={770} /><div><span>START WITH A QUESTION</span><p>답을 서두르지 않아도 괜찮아요.<br />지금 떠오르는 생각에서 시작해요.</p></div></div>
                 <AnswerChoices answers={ANSWERS} value={mission.initial} onChange={(value) => update("initial", value)} label="지금은 어떻게 생각하나요?" />
@@ -203,7 +203,7 @@ export default function ScienceLab() {
                 <details className="lab-result-observations"><summary>전체 관찰 기록 보기 · {observations.length}개</summary>{observations.map((finding) => <article key={finding.key}><h4>{finding.planet.name} · {finding.title}</h4><p>{finding.detail}</p><p><b>더 확인할 점:</b> {finding.limit}</p></article>)}</details>
                 <div className="lab-result-actions"><button type="button" className="lab-button gold" onClick={downloadRecord}>탐구 기록 저장 (.txt)</button><button type="button" className="lab-button outline" onClick={() => window.print()}>기록 인쇄</button><Link className="lab-text-link" href="/lab">다른 유니버스 둘러보기 →</Link></div>
               </section>}
-            </>}
+            </div>}
             <div ref={errorRef} tabIndex={-1} role={error ? "alert" : undefined} className={error ? "lab-error" : "lab-sr-only"}>{error}</div>
             {loaded && !(mission.step === 4 && mission.completed) && <footer className="lab-step-actions"><button type="button" className="lab-button outline" disabled={mission.step === 0} onClick={() => goToStep(mission.step - 1)}>← 이전</button><span>{mission.step + 1} / 5 단계</span><button type="submit" className="lab-button gold">{mission.step === 4 ? "탐구 기록 완성" : `${LAB_STEPS[mission.step + 1].label}으로 이동`} <IconArrow width={18} height={18} /></button></footer>}
           </form>

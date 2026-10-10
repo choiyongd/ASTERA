@@ -39,6 +39,9 @@ async function mount({ cached = true, reduced = false, strict = false } = {}) {
   await act(async () => { renderer = create(strict ? React.createElement(React.StrictMode, null, element("page one")) : element("page one"), { createNodeMock: el => el.type === "img" ? logo : el.props.className === "site-content" ? { focus: () => focusCount++ } : {} }); });
   return {
     phase: () => renderer.root.findByProps({ className: "brand-intro" }).props["data-phase"],
+    ready: () => renderer.root.findByProps({ className: "site-content" }).props["data-ready"],
+    letters: () => renderer.root.findAllByProps({ className: "brand-intro-letter" }).map(node => ({ text: node.children.join(""), delay: node.props.style["--letter-delay"] })),
+    tagline: () => renderer.root.findByProps({ className: "brand-intro-tagline" }).props["aria-label"],
     blocked: () => renderer.root.findByProps({ className: "site-content" }).props.inert === true,
     overflow: () => document.body.style.overflow,
     timers,
@@ -78,4 +81,17 @@ test("reduced-motion users land immediately, and Strict Mode leaves one live exi
   try { assert.equal(reduced.phase(), "done"); assert.equal(reduced.blocked(), false); assert.equal(reduced.timers.size, 0); } finally { await reduced.cleanup(); }
   const strict = await mount({ strict: true });
   try { assert.equal(strict.phase(), "playing"); assert.equal(strict.timers.size, 1); await strict.advance(2000); assert.equal(strict.phase(), "done"); } finally { await strict.cleanup(); }
+});
+
+test("page readiness changes only after the opening, and character spans retain one accessible tagline", async () => {
+  const intro = await mount();
+  try {
+    assert.equal(intro.ready(), "false");
+    assert.equal(intro.letters().map(letter => letter.text).join(""), "질문에서,세상이 시작됩니다.");
+    assert.equal(intro.tagline(), "질문에서, 세상이 시작됩니다.");
+    assert.ok(new Set(intro.letters().map(letter => letter.delay)).size > 10);
+    await intro.advance(2000); assert.equal(intro.ready(), "true");
+    await intro.replay(); assert.equal(intro.ready(), "false");
+    await intro.skip(); assert.equal(intro.ready(), "true");
+  } finally { await intro.cleanup(); }
 });
