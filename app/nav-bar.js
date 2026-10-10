@@ -51,6 +51,7 @@ export default function NavBar() {
   }
 
   const NAV_LINKS = [
+    { href: "/about", label: "ASTERA 소개" },
     { href: "/lab", label: "ASTERA LAB" },
     { href: "/#discover", label: "탐험하기" },
     { href: "/#universes", label: "유니버스" },
@@ -58,19 +59,20 @@ export default function NavBar() {
     { href: "/#community", label: "커뮤니티" },
     { href: "/pricing", label: "요금제" },
   ];
+  const isCurrent = (href) => href === "/lab" ? pathname.startsWith("/lab") : pathname === href;
 
   return (
     <>
       <header className="topbar">
         <div className="wrap nav">
           <Link className="brand" href="/" aria-label="ASTERA 홈">
-            <img className="brand-logo" src="/brand/astera_logo_reversed_transparent.png" alt="ASTERA" width={134} height={30} />
+            <img className="brand-logo" src="/brand/astera_logo_reversed_transparent.png" alt="ASTERA" width={160} height={36} />
             <span className="beta-badge">BETA</span>
           </Link>
 
-          <nav className="navlinks">
+          <nav className="navlinks" aria-label="상단 메뉴">
             {NAV_LINKS.map((l) => (
-              <Link key={l.label} href={l.href} aria-current={l.href === "/lab" && pathname.startsWith("/lab") ? "page" : undefined}>
+              <Link key={l.label} href={l.href} aria-current={isCurrent(l.href) ? "page" : undefined}>
                 {l.label}
               </Link>
             ))}
@@ -122,7 +124,7 @@ export default function NavBar() {
         {menuOpen && (
           <div className="mobile-menu" id="mobile-menu">
             {NAV_LINKS.map((l) => (
-              <Link key={l.label} href={l.href} onClick={() => setMenuOpen(false)}>
+              <Link key={l.label} href={l.href} aria-current={isCurrent(l.href) ? "page" : undefined} onClick={() => setMenuOpen(false)}>
                 {l.label}
               </Link>
             ))}

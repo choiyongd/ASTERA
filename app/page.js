@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import NavBar from "./nav-bar";
+import BrandFooter from "./brand-footer";
 import RadarChart from "./radar-chart";
 import ContentTile from "./content-tile";
 import { UNIVERSES, UniverseIcon } from "./universe-icons";
@@ -240,7 +241,7 @@ export default function HomePage() {
                 }}
               >
                 <span className="qicon">
-                  <UniverseIcon name={u.name} size={18} />
+                  <UniverseIcon name={u.name} size={40} />
                 </span>
                 <b>{u.name}</b>
                 <span>{u.kr}</span>
@@ -466,7 +467,7 @@ export default function HomePage() {
                 }}
               >
                 <i>
-                  <UniverseIcon name={u.name} size={18} />
+                  <UniverseIcon name={u.name} size={44} />
                 </i>
                 <b>
                   {u.name} <span>· {u.kr}</span>
@@ -594,17 +595,7 @@ export default function HomePage() {
         </section>
       </main>
 
-      <footer>
-        <div className="wrap footerline">
-          <div className="footer-brand">
-            <img src="/images/astera-mark.png" alt="" aria-hidden="true" width={22} height={22} />
-            <span>
-              <b>ASTERA</b> <span className="footer-tagline">Where questions open worlds.</span>
-            </span>
-          </div>
-          <div>Beta · 2026</div>
-        </div>
-      </footer>
+      <BrandFooter />
 
       {toast && <div className="toast">{toast}</div>}
 

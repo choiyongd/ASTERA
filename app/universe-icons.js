@@ -11,66 +11,21 @@ export const UNIVERSES = [
   { name: "HUMAN", kr: "인간", desc: "철학 · 심리 · 관계", q: "나는 왜 나일까?" },
 ];
 
-export const UNIVERSE_ICONS = {
-  ECONOMY: <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />,
-  LITERATURE: (
-    <>
-      <path d="M12 6.5C10.5 5 8 4.5 4 4.5v13.7c4 0 6.5.5 8 2 1.5-1.5 4-2 8-2V4.5c-4 0-6.5.5-8 2Z" />
-      <path d="M12 6.5v13.7" />
-    </>
-  ),
-  ART: (
-    <>
-      <path d="M12 2a9 9 0 1 0 0 18c1 0 1.5-.6 1.5-1.4 0-.4-.2-.7-.4-1-.2-.3-.4-.6-.4-1 0-.8.6-1.4 1.4-1.4h1.6A4.9 4.9 0 0 0 20.6 10 8 8 0 0 0 12 2Z" />
-      <circle cx="7.5" cy="10.5" r="1" />
-      <circle cx="10.5" cy="7" r="1" />
-      <circle cx="15" cy="7.5" r="1" />
-      <circle cx="17" cy="11" r="1" />
-    </>
-  ),
-  HISTORY: <path d="M4 21h16M5 21V8M9 21V8M15 21V8M19 21V8M3 8l9-5 9 5" />,
-  TECH: (
-    <>
-      <rect x="6" y="6" width="12" height="12" rx="2" />
-      <path d="M9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3" />
-    </>
-  ),
-  ENGINEERING: (
-    <>
-      <circle cx="12" cy="12" r="3" />
-      <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z" />
-    </>
-  ),
-  SCIENCE: (
-    <>
-      <circle cx="12" cy="12" r="9" />
-      <ellipse cx="12" cy="12" rx="9" ry="3.6" />
-      <path d="M12 3v18" />
-    </>
-  ),
-  HUMAN: (
-    <>
-      <circle cx="12" cy="8" r="4" />
-      <path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8" />
-    </>
-  ),
-};
+// The official v3 symbols are shared by every universe surface.
+export const UNIVERSE_LOGOS = Object.fromEntries(
+  UNIVERSES.map(({ name }) => [name, `/brand/ASTERA_${name}_symbol_v3.webp`])
+);
 
-export function UniverseIcon({ name, size = 18, ...props }) {
+export function UniverseIcon({ name, size = 40, className = "", ...props }) {
   return (
-    <svg
+    <img
+      src={UNIVERSE_LOGOS[name] ?? UNIVERSE_LOGOS.SCIENCE}
       width={size}
       height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      strokeLinecap="round"
-      strokeLinejoin="round"
+      alt=""
       aria-hidden="true"
+      className={`universe-symbol ${className}`.trim()}
       {...props}
-    >
-      {UNIVERSE_ICONS[name] ?? UNIVERSE_ICONS.SCIENCE}
-    </svg>
+    />
   );
 }

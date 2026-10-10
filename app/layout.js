@@ -1,4 +1,6 @@
 import "./globals.css";
+import "./brand-intro.css";
+import BrandIntro from "./brand-intro";
 
 export const metadata = {
   title: "ASTERA — 궁금함이 배움이 되는 곳",
@@ -8,8 +10,9 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="ko">
+    <html lang="ko" suppressHydrationWarning>
       <head>
+        <script dangerouslySetInnerHTML={{ __html: "try{if(sessionStorage.getItem('astera:brand-intro:v1')==='seen')document.documentElement.dataset.asteraIntroSeen='true'}catch(e){}" }} />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"
@@ -17,11 +20,11 @@ export default function RootLayout({ children }) {
           crossOrigin="anonymous"
         />
         <link
-          href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Playfair+Display:ital@1&family=Noto+Serif+KR:wght@500&display=swap"
+          href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Playfair+Display:ital@1&family=Noto+Serif+KR:wght@500;700&family=Cormorant+Garamond:wght@600&display=swap"
           rel="stylesheet"
         />
       </head>
-      <body>{children}</body>
+      <body><BrandIntro>{children}</BrandIntro></body>
     </html>
   );
 }

@@ -1,0 +1,17 @@
+.brand-intro{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;background:#071a3d;color:#f7f2e8;animation:brand-intro-exit 2s linear both}
+.brand-intro-center{text-align:center;width:100%;padding:32px 22px}
+.brand-intro-logo{display:block;width:min(420px,80vw);height:auto;margin:0 auto;animation:brand-intro-appear .35s ease-out both}
+.brand-intro-tagline{font-family:"Noto Serif KR",serif;font-weight:700;font-size:clamp(25px,4.5vw,38px);line-height:1.65;letter-spacing:-.04em;margin:34px 0 0}
+.brand-intro-tagline span{display:inline-block;animation:brand-intro-type .32s ease-out both}
+.brand-intro-tagline span:first-child{animation-delay:.3s}
+.brand-intro-tagline span:last-child{animation-delay:.6s;color:#f3ddb0}
+.brand-intro-skip{position:absolute;right:max(22px,env(safe-area-inset-right));bottom:max(24px,env(safe-area-inset-bottom));display:inline-flex;gap:14px;align-items:center;min-height:44px;padding:10px 14px;border:1px solid #ffffff3b;border-radius:8px;background:none;color:#e7e9f7;font-size:13px;cursor:pointer}
+.brand-intro-skip:hover{background:#ffffff12}
+.brand-intro-skip:focus-visible{outline:2px solid #f3ddb0;outline-offset:4px}
+.site-content:focus{outline:none}
+html[data-astera-intro-seen="true"] .brand-intro{display:none}
+@keyframes brand-intro-appear{from{opacity:0}to{opacity:1}}
+@keyframes brand-intro-type{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes brand-intro-exit{0%,90%{opacity:1;visibility:visible}100%{opacity:0;visibility:hidden;pointer-events:none}}
+@media(prefers-reduced-motion:reduce){.brand-intro{display:none}.brand-intro,.brand-intro *{animation:none!important}}
+@media print{.brand-intro{display:none!important}}

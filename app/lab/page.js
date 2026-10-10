@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { LAB_TOPICS } from "@/lib/lab/topics";
 import { IconArrow } from "../icons";
+import { UniverseIcon } from "../universe-icons";
 
 export const metadata = { title: "ASTERA LAB — 질문을 직접 탐구하는 8개의 실험실", description: "초등 중고학년을 위한 5–10분 탐구 웹앱. SCIENCE 001에서 행성의 단서를 조사하고 나의 생각을 근거로 정리해보세요." };
 
@@ -27,8 +28,8 @@ export default function LabPage() {
         <section className="lab-catalog-section" aria-labelledby="universes-title">
           <div className="lab-section-heading"><div><p className="lab-kicker">8 UNIVERSES / 8 QUESTIONS</p><h2 id="universes-title">여덟 개의 질문, 여덟 가지 탐구</h2></div><p>첫 앱부터 순서대로 열립니다.</p></div>
           <div className="lab-topic-grid">
-            {LAB_TOPICS.map((topic) => <article className={`lab-topic ${topic.status === "ready" ? "ready" : ""}`} key={topic.id} style={{ "--universe-accent": topic.color }}>
-              <div className="lab-topic-top"><img src={`/brand/ASTERA_${topic.icon}_symbol_v3.webp`} alt="" width={58} height={58} loading="lazy" /><span className={`lab-status ${topic.status}`}>{topic.status === "ready" ? "체험 가능" : `개발 순서 ${topic.order}`}</span></div>
+            {LAB_TOPICS.map((topic) => <article id={topic.id} className={`lab-topic ${topic.status === "ready" ? "ready" : ""}`} key={topic.id} style={{ "--universe-accent": topic.color }}>
+              <div className="lab-topic-top"><UniverseIcon name={topic.universe} size={58} loading="lazy" /><span className={`lab-status ${topic.status}`}>{topic.status === "ready" ? "체험 가능" : `개발 순서 ${topic.order}`}</span></div>
               <p className="lab-topic-code">{topic.code} · {topic.kr}</p><h3>{topic.title}</h3><p className="lab-topic-desc">{topic.activity}</p>
               <div className="lab-topic-goals">{topic.goals.map((goal) => <span key={goal}>{goal}</span>)}</div>
               <div className="lab-topic-bottom"><span>{topic.tool}</span>{topic.status === "ready" ? <Link href={`/lab/${topic.id}`} aria-label={`${topic.code} 생명 탐사 시작`}>탐구하기 <IconArrow width={16} height={16} /></Link> : <span className="lab-planned-label">준비 중</span>}</div>
