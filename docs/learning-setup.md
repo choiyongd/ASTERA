@@ -75,3 +75,7 @@ HTML은 CSS와 JavaScript를 파일 안에 포함한 단일 파일입니다. 외
 - `npm run test:rules`: Firebase Firestore/Storage 에뮬레이터에서 실제 규칙을 검사합니다. Java 21+가 필요합니다. 테스트 프로젝트는 `demo-astera`이며 운영 데이터에 쓰지 않습니다.
 
 운영 Firebase 프로젝트가 연결되면 실제 회원가입 → 이메일 인증 → 관리자 지정 → 업로드 → 발행 → 회원 학습 → 마이페이지 그래프 흐름을 별도로 확인합니다.
+
+## 현재 운영 연결 상태
+
+ASTERA 전용 프로젝트 `astera-learning-choiyongd`, 웹 앱 `ASTERA Web`, Standard 기본 데이터베이스(서울 `asia-northeast3`)와 이메일 로그인 설정을 배포했습니다. 사용자의 요청으로 Storage 파일 업로드는 보류하며 `FIREBASE_UPLOADS_ENABLED=false`로 설정합니다. 현재는 외부 웹앱 주소와 기존 LAB을 연결할 수 있습니다. 향후 Storage를 활성화하고 규칙을 배포한 뒤 이 값을 true로 바꾸고 재배포해야 새 파일 업로드를 허용합니다.

@@ -19,6 +19,7 @@ export default function LessonEditor({
   initialAssets,
   releases,
   publication,
+  fileUploadsEnabled = false,
 }) {
   const router = useRouter();
   const [lesson, setLesson] = useState(initialLesson),
@@ -344,21 +345,28 @@ export default function LessonEditor({
               </label>
               {!lesson ? (
                 <p className="learning-note">
-                  주제명을 입력하고 초안을 먼저 저장해주세요. 저장 후 파일을
-                  올릴 수 있어요.
+                  주제명을 입력하고 초안을 먼저 저장해주세요. 저장 후 학습자료를
+                  연결할 수 있어요.
                 </p>
               ) : (
                 <>
-                  <label className="learning-upload">
-                    PDF 또는 웹앱 업로드
-                    <input
-                      ref={fileRef}
-                      type="file"
-                      accept=".pdf,.html"
-                      onChange={uploadFile}
-                    />
-                    <small>PDF 25MB · 단일 HTML 2MB까지</small>
-                  </label>
+                  {fileUploadsEnabled ? (
+                    <label className="learning-upload">
+                      PDF 또는 웹앱 업로드
+                      <input
+                        ref={fileRef}
+                        type="file"
+                        accept=".pdf,.html"
+                        onChange={uploadFile}
+                      />
+                      <small>PDF 25MB · 단일 HTML 2MB까지</small>
+                    </label>
+                  ) : (
+                    <p className="learning-note">
+                      파일 업로드는 현재 보류 중이에요. 아래에서 기존 LAB이나
+                      외부 웹앱 주소를 연결할 수 있어요.
+                    </p>
+                  )}
                   <details>
                     <summary>HTML 웹앱 준비 방법</summary>
                     <p>

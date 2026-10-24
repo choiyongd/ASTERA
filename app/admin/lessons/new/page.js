@@ -14,6 +14,7 @@ export default async function NewLessonPage() {
       initialLesson={null}
       initialAssets={[]}
       releases={[]}
+      fileUploadsEnabled={process.env.FIREBASE_UPLOADS_ENABLED === "true"}
       publication={null}
     />
   );

@@ -42,6 +42,7 @@ export default async function EditLessonPage({ params }) {
       initialLesson={lesson.data}
       initialAssets={assets.data}
       releases={versions.data}
+      fileUploadsEnabled={process.env.FIREBASE_UPLOADS_ENABLED === "true"}
       publication={catalog.data}
     />
   );
