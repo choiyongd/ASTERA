@@ -26,6 +26,11 @@ export default function EmailAction() {
     [confirm, setConfirm] = useState("");
   useEffect(() => {
     let active = true;
+    setMessage("");
+    if (!mode && !code) {
+      setState("entry");
+      return;
+    }
     setState("checking");
     async function check() {
       if (!Object.hasOwn(labels, mode) || !code || code.length > 2048)
@@ -121,6 +126,8 @@ export default function EmailAction() {
             <Link href="/admin/login">관리자 로그인</Link>
           </div>
         </>
+      ) : state === "entry" ? (
+        <VerificationLinkForm />
       ) : state !== "error" ? (
         <form onSubmit={complete}>
           <p>{email}</p>
