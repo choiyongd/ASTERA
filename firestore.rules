@@ -1,0 +1,28 @@
+rules_version = '2';
+service cloud.firestore {
+ match /databases/{database}/documents {
+  function signedIn(){return request.auth!=null;}
+  function admin(){return signedIn()&&request.auth.token.email_verified==true&&exists(/databases/$(database)/documents/learning_admins/$(request.auth.uid));}
+  function entitled(scope){return scope=='public'||(signedIn()&&(scope=='member'||(scope=='subscriber'&&get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data.is_member==true&&timestamp.value(get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data.membership_expires_at)>request.time)));}
+  function released(id){let r=get(/databases/$(database)/documents/learning_releases/$(id)).data;let c=get(/databases/$(database)/documents/learning_catalog/$(r.lesson_id)).data;return c.release_id==id&&entitled(c.access);}
+  function text(s){return s is string&&s.size()<=4000;}
+  function done(s){return text(s)&&s.size()>=6&&s.matches('(?s).*\\S.{4,}\\S.*');}
+  function ratings(a){return a is list&&a.size()==4&&a.hasOnly([0,1,2,3,4,5]);}
+  function assessed(a){return ratings(a)&&!a.hasAny([0]);}
+  function validProgress(){let d=request.resource.data;let a=d.answers;let r=get(/databases/$(database)/documents/learning_releases/$(d.release_id)).data;return d.keys().hasOnly(['id','user_id','release_id','answers','step','completed','revision','updated_at','assessment','lesson_id','universe','title','version'])&&d.lesson_id==r.lesson_id&&d.universe==r.content.universe&&d.title==r.content.title&&d.version==r.version&&d.assessment.keys().hasOnly(['pre','post'])&&ratings(d.assessment.pre)&&ratings(d.assessment.post)&&(d.step==0||assessed(d.assessment.pre))&&(!d.completed||assessed(d.assessment.post))&&d.user_id==request.auth.uid&&d.id==request.auth.uid+'_'+d.release_id&&a.keys().hasOnly(['question','concept','explore','apply','reflect'])&&text(a.question)&&text(a.concept)&&text(a.explore)&&text(a.apply)&&text(a.reflect)&&d.step is int&&d.step>=0&&d.step<=4&&d.completed is bool&&d.updated_at is string&&(d.step<1||done(a.question))&&(d.step<2||done(a.concept))&&(d.step<3||done(a.explore))&&(d.step<4||done(a.apply))&&(!d.completed||(done(a.question)&&done(a.concept)&&done(a.explore)&&done(a.apply)&&done(a.reflect)))&&released(d.release_id);}
+  match /learning_admins/{uid}{allow get:if signedIn()&&request.auth.uid==uid;allow list,write:if false;}
+  match /profiles/{uid}{allow get:if admin()||(signedIn()&&request.auth.uid==uid);allow list:if admin();allow create:if signedIn()&&request.auth.uid==uid&&request.resource.data.id==uid&&request.resource.data.email==request.auth.token.email&&request.resource.data.is_member==false&&request.resource.data.membership_expires_at==null&&request.resource.data.keys().hasOnly(['id','email','is_member','membership_expires_at','created_at','updated_at']);allow update,delete,list:if false;}
+  match /learning_lessons/{id}{allow read,create,update:if admin();allow delete:if false;}
+  match /learning_catalog/{id}{allow read:if true;allow write:if admin();}
+  match /learning_slugs/{slug}{allow read,write:if admin();}
+  match /learning_releases/{id}{allow get:if admin()||(resource.data.lesson_id is string&&get(/databases/$(database)/documents/learning_catalog/$(resource.data.lesson_id)).data.release_id==id&&entitled(get(/databases/$(database)/documents/learning_catalog/$(resource.data.lesson_id)).data.access));allow list:if admin();allow create:if admin();allow update,delete:if false;}
+  match /learning_assets/{id}{allow get:if admin()||(resource.data.ready==true&&id in get(/databases/$(database)/documents/learning_catalog/$(resource.data.lesson_id)).data.materialIds&&entitled(get(/databases/$(database)/documents/learning_catalog/$(resource.data.lesson_id)).data.access));allow list:if admin();allow create:if admin();allow update:if admin()&&resource.data.ready==false&&request.resource.data.diff(resource.data).affectedKeys().hasOnly(['ready'])&&request.resource.data.ready==true;allow delete:if false;}
+  match /learning_file_access/{id}{allow read,write:if admin();}
+  match /learning_progress/{id}{allow get:if admin()||(signedIn()&&(resource==null||resource.data.user_id==request.auth.uid));allow list:if admin()||(signedIn()&&resource.data.user_id==request.auth.uid);allow create:if signedIn()&&validProgress()&&request.resource.data.revision==1;allow update:if signedIn()&&resource.data.user_id==request.auth.uid&&validProgress()&&request.resource.data.release_id==resource.data.release_id&&request.resource.data.revision==resource.data.revision+1;allow delete:if false;}
+  match /orders/{id}{allow read:if signedIn()&&resource.data.user_id==request.auth.uid;allow write:if false;}
+  match /site_pages/{id}{allow read,write:if admin();}
+  match /site_page_catalog/{id}{allow read:if true;allow write:if admin();}
+  match /site_page_slugs/{id}{allow read,write:if admin();}
+  match /{document=**}{allow read,write:if false;}
+ }
+}

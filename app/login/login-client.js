@@ -1,14 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
+import { createClient, restoreSession } from "@/lib/firebase/client";
 
-export default function LoginClient() {
+export default function LoginClient({adminMode=false,defaultNext="/account"}) {
   const router = useRouter();
   const params = useSearchParams();
-  const next = params.get("next") || "/account";
+  const requestedNext = params.get("next") || defaultNext;
+  const next = requestedNext.startsWith("/") && !requestedNext.startsWith("//") ? requestedNext : "/account";
+  useEffect(()=>{restoreSession().then(user=>{if(user){router.replace(next);router.refresh();}}).catch(()=>{});},[next,router]);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -36,9 +38,9 @@ export default function LoginClient() {
 
   return (
     <div className="auth-card">
-      <span className="eyebrow">ASTERA 로그인</span>
-      <h1>다시 만나서 반가워요</h1>
-      <p className="sub">가입할 때 사용한 이메일과 비밀번호로 로그인하세요.</p>
+      <span className="eyebrow">{adminMode?"ASTERA 관리자 로그인":"ASTERA 로그인"}</span>
+      <h1>{adminMode?"학습을 준비하는 공간":"다시 만나서 반가워요"}</h1>
+      <p className="sub">{adminMode?"지정된 운영자 계정으로 로그인하세요. 자료 관리는 이메일 인증을 마친 관리자만 이용할 수 있어요.":"가입할 때 사용한 이메일과 비밀번호로 로그인하세요."}</p>
 
       {msg && <div className={`form-msg ${msg.type}`}>{msg.text}</div>}
 

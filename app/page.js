@@ -1,5 +1,6 @@
 "use client";
 
+import "./learn/learning.css";
 import { filterLibrary } from "@/lib/library-search.mjs";
 
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -243,7 +244,8 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="wrap home-lab-entry" aria-labelledby="home-lab-title">
+        <section className="wrap learning-home-entry"><div><h2>하나의 질문, 20분의 탐구</h2><p>PDF와 웹앱으로 배우고, 나의 생각을 학습 기록으로 남겨보세요.</p></div><Link href="/learn">20분 학습 둘러보기 →</Link></section>
+      <section className="wrap home-lab-entry" aria-labelledby="home-lab-title">
           <div className="home-lab-code"><span>ASTERA LAB</span><b>SCIENCE 001</b></div>
           <div><h2 id="home-lab-title">오늘은, 생명 탐사자.</h2><p>5–10분 동안 행성의 단서를 조사하고, 나의 생각을 근거로 설명해보세요.</p></div>
           <Link className="home-lab-link" href="/lab">8개 유니버스의 LAB 보기 <IconArrow width={17} height={17} /></Link>
