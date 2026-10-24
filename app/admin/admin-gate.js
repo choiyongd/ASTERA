@@ -1,9 +1,13 @@
 import Link from "next/link";
+import EmailVerification from "../account/components/email-verification";
 export default function AdminGate({ configured, user, unavailable = false }) {
   return (
     <main className="learning-shell">
       <p className="learning-kicker">ASTERA STUDIO</p>
       <h1>학습자료 관리</h1>
+      {user && !user.emailVerified && !unavailable && (
+        <EmailVerification next="/admin" />
+      )}
       <section className="learning-panel learning-empty">
         <h2>
           {!configured

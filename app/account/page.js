@@ -4,6 +4,7 @@ import NavBar from "../nav-bar";
 import LogoutButton from "./logout-button";
 import { learningContext, dbCheck, catalogState } from "@/lib/learning/server";
 import { learningAnalytics } from "@/lib/learning/analytics.mjs";
+import EmailVerification from "./components/email-verification";
 import LearningCharts from "./components/learning-charts";
 import "../learn/learning.css";
 export const dynamic = "force-dynamic";
@@ -46,6 +47,7 @@ export default async function AccountPage() {
             <LogoutButton />
           </div>
         </header>
+        {!ctx.user.emailVerified && <EmailVerification />}
         <div className="learning-stats">
           <article>
             <span>완료한 주제</span>
