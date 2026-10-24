@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { resendVerification, refreshVerification } from "@/lib/firebase/client";
+import VerificationLinkForm from "../../auth/action/verification-link-form";
 export default function EmailVerification({ next }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
@@ -59,6 +60,10 @@ export default function EmailVerification({ next }) {
         </button>
       </div>
       <p role="status">{message}</p>
+      <details>
+        <summary>인증 링크에서 오류가 나나요?</summary>
+        <VerificationLinkForm />
+      </details>
     </section>
   );
 }

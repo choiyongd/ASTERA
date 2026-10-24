@@ -9,6 +9,7 @@ import {
   confirmPasswordReset,
 } from "firebase/auth";
 import { firebaseClient, refreshVerification } from "@/lib/firebase/client";
+import VerificationLinkForm from "./verification-link-form";
 const labels = {
   verifyEmail: "이메일 인증",
   resetPassword: "비밀번호 재설정",
@@ -96,7 +97,11 @@ export default function EmailAction() {
     <section className="auth-card">
       <span className="eyebrow">ASTERA ACCOUNT</span>
       <h1>
-        {state === "done" ? "완료했어요" : labels[mode] || "인증 링크 확인"}
+        {state === "done"
+          ? "완료했어요"
+          : Object.hasOwn(labels, mode)
+            ? labels[mode]
+            : "인증 링크 확인"}
       </h1>
       {state === "checking" ? (
         <p role="status">인증 링크를 확인하고 있어요…</p>
@@ -169,7 +174,10 @@ export default function EmailAction() {
           </button>
         </form>
       ) : (
-        <p role="alert">{message}</p>
+        <>
+          <p role="alert">{message}</p>
+          <VerificationLinkForm />
+        </>
       )}
       {message && state !== "error" && <p role="alert">{message}</p>}
       <div className="alt-action">
