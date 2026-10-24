@@ -1,24 +1,13 @@
+export const dynamic="force-dynamic";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import NavBar from "../nav-bar";
-import { createClient } from "@/lib/supabase/server";
+import { learningContext } from "@/lib/learning/server";
 import { MEMBERSHIP_PLAN } from "@/lib/membership";
 
 export default async function WorkbookPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/login?next=/workbook");
-  }
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("is_member, membership_expires_at")
-    .eq("id", user.id)
-    .single();
+  const { user, profile, admin } = await learningContext();
+  if(!user) redirect("/login?next=/workbook");
 
   const isMember =
     profile?.is_member && profile?.membership_expires_at && new Date(profile.membership_expires_at) > new Date();

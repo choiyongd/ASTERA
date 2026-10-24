@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
+import { createClient } from "@/lib/firebase/client";
 import { IconSearch, IconBell, IconUser, IconMenu, IconClose, IconHome, IconCompass, IconCheck, IconChat } from "./icons";
 
 export default function NavBar() {
@@ -16,7 +16,7 @@ export default function NavBar() {
 
   useEffect(() => {
     // Public LAB activities must work even before auth configuration is installed.
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    if (!process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || !process.env.NEXT_PUBLIC_FIREBASE_API_KEY || !process.env.NEXT_PUBLIC_FIREBASE_APP_ID) {
       setUser(null);
       return;
     }
@@ -55,9 +55,11 @@ export default function NavBar() {
     { href: "/#discover", label: "탐험하기" },
     { href: "/#universes", label: "유니버스" },
     { href: "/lab", label: "ASTERA LAB" },
+    { href: "/learn", label: "20분 학습" },
     { href: "/#products", label: "학습도구" },
     { href: "/#community", label: "커뮤니티" },
     { href: "/pricing", label: "요금제" },
+    { href: "/pages", label: "안내" },
   ];
   const isCurrent = (href) => href === "/lab" ? pathname.startsWith("/lab") : pathname === href;
 

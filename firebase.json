@@ -1,0 +1,36 @@
+{
+  "firestore": {
+    "database": "(default)",
+    "location": "asia-northeast3",
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json",
+    "edition": "standard"
+  },
+  "storage": {
+    "rules": "storage.rules"
+  },
+  "emulators": {
+    "firestore": {
+      "port": 8080
+    },
+    "storage": {
+      "port": 9199
+    },
+    "ui": {
+      "enabled": false
+    },
+    "singleProjectMode": true
+  },
+  "auth": {
+    "providers": {
+      "emailPassword": true
+    },
+    "authorizedDomains": [
+      "localhost",
+      "astera-mu.vercel.app",
+      "astera-learning-choiyongd.firebaseapp.com",
+      "astera-learning-choiyongd.web.app",
+      "astera-git-codex-firebase-learn-d87fc7-choiyongd-3326s-projects.vercel.app"
+    ]
+  }
+}

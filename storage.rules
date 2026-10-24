@@ -1,0 +1,13 @@
+rules_version = '2';
+service firebase.storage {
+ match /b/{bucket}/o {
+  function admin(){return request.auth!=null&&request.auth.token.email_verified==true&&firestore.exists(/databases/(default)/documents/learning_admins/$(request.auth.uid));}
+  function fileAccess(id){let p=firestore.get(/databases/(default)/documents/learning_file_access/$(id)).data;return (request.auth!=null&&p.owner_uid==request.auth.uid)||(p.active==true&&(p.scope=='public'||(request.auth!=null&&(p.scope=='member'||(p.scope=='subscriber'&&firestore.get(/databases/(default)/documents/profiles/$(request.auth.uid)).data.is_member==true&&timestamp.value(firestore.get(/databases/(default)/documents/profiles/$(request.auth.uid)).data.membership_expires_at)>request.time)))));}
+  match /learning-materials/{lessonId}/{assetId}/{kind}{
+   allow read:if fileAccess(assetId);
+   allow create:if admin()&&((kind=='pdf'&&request.resource.contentType=='application/pdf'&&request.resource.size<=25*1024*1024)||(kind=='html'&&request.resource.contentType=='text/html'&&request.resource.size<=2*1024*1024))&&request.resource.size==firestore.get(/databases/(default)/documents/learning_assets/$(assetId)).data.size&&firestore.get(/databases/(default)/documents/learning_assets/$(assetId)).data.lesson_id==lessonId&&firestore.get(/databases/(default)/documents/learning_assets/$(assetId)).data.ready==false;
+   allow update,delete:if false;
+  }
+  match /{allPaths=**}{allow read,write:if false;}
+ }
+}

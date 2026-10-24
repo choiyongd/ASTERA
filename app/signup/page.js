@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import NavBar from "../nav-bar";
-import { createClient } from "@/lib/supabase/client";
+import { createClient } from "@/lib/firebase/client";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -18,8 +18,8 @@ export default function SignupPage() {
     setLoading(true);
     setMsg(null);
 
-    const supabase = createClient();
-    const { data, error } = await supabase.auth.signUp({ email, password });
+    const client = createClient();
+    const { data, error } = await client.auth.signUp({ email, password });
 
     setLoading(false);
 
@@ -37,7 +37,9 @@ export default function SignupPage() {
 
     setMsg({
       type: "success",
-      text: "가입 확인 메일을 보냈어요. 메일함에서 링크를 눌러 인증을 완료해주세요.",
+      text: data.verificationSent
+        ? "가입을 완료했어요. 인증 메일의 링크를 눌러주세요."
+        : "가입은 완료됐어요. 마이페이지에서 인증 메일을 다시 요청해주세요.",
     });
   }
 
@@ -48,9 +50,20 @@ export default function SignupPage() {
         <div className="auth-card">
           <span className="eyebrow">ASTERA 회원가입</span>
           <h1>궁금함을 시작해요</h1>
-          <p className="sub">이메일로 1분이면 가입이 끝나요. 워크북 이용을 위해 필요합니다.</p>
+          <p className="sub">
+            이메일로 1분이면 가입이 끝나요. 워크북 이용을 위해 필요합니다.
+          </p>
 
-          {msg && <div className={`form-msg ${msg.type}`}>{msg.text}</div>}
+          {msg && (
+            <div className={`form-msg ${msg.type}`} role="status">
+              {msg.text}
+              {msg.type === "success" && (
+                <p>
+                  <Link href="/account">마이페이지에서 이메일 인증 확인 →</Link>
+                </p>
+              )}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit}>
             <div className="field">

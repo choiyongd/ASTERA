@@ -1,0 +1,21 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "learning_releases",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "lesson_id", "order": "ASCENDING" },
+        { "fieldPath": "version", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "learning_progress",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "user_id", "order": "ASCENDING" },
+        { "fieldPath": "updated_at", "order": "DESCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

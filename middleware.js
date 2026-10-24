@@ -1,14 +1,6 @@
-import { updateSession } from "./lib/supabase/middleware";
-
-export async function middleware(request) {
-  return await updateSession(request);
+import { NextResponse } from "next/server";
+// Firebase 토큰과 자료 권한은 서버 페이지와 API에서 검증합니다.
+export function middleware() {
+  return NextResponse.next();
 }
-
-export const config = {
-  matcher: [
-    /*
-     * 정적 파일, 이미지 최적화 요청 등은 제외하고 나머지 모든 경로에서 실행합니다.
-     */
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
-  ],
-};
+export const config = { matcher: ["/admin/:path*", "/learn/:path*"] };
