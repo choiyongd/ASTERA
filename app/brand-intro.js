@@ -19,18 +19,16 @@ export default function BrandIntro({ children }) {
   }, []);
   const start = useCallback(() => {
     window.clearTimeout(readyTimer.current);
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) finish();
-    else setPhase("playing");
-  }, [finish]);
+    setPhase("playing");
+  }, []);
   const prepare = useCallback(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) { finish(); return; }
     setPhase("waiting");
     if (logoRef.current?.complete && logoRef.current?.naturalWidth > 0) start();
     else readyTimer.current = window.setTimeout(() => {
       setImageFailed(!logoRef.current?.naturalWidth);
       start();
     }, 1200);
-  }, [finish, start]);
+  }, [start]);
   const skip = useCallback(() => {
     finish();
     requestAnimationFrame(() => contentRef.current?.focus({ preventScroll: true }));
@@ -39,14 +37,10 @@ export default function BrandIntro({ children }) {
   useEffect(() => {
     // Every full page load plays; client-side navigation keeps this root mounted.
     prepare();
-    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const onPreference = () => { if (media.matches) finish(); };
     window.addEventListener("astera:replay-intro", prepare);
-    media.addEventListener("change", onPreference);
     return () => {
       window.clearTimeout(readyTimer.current);
       window.removeEventListener("astera:replay-intro", prepare);
-      media.removeEventListener("change", onPreference);
     };
   }, [prepare, finish]);
 

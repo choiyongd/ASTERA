@@ -70,15 +70,15 @@ test("an unavailable image uses the timed wordmark fallback instead of trapping 
   const intro = await mount({ cached: false });
   try { await intro.advance(1200); assert.equal(intro.phase(), "playing"); await intro.advance(2000); assert.equal(intro.phase(), "done"); assert.equal(intro.blocked(), false); } finally { await intro.cleanup(); }
 });
-test("logo error, skip, Escape, and changed motion preference release input blocking", async () => {
-  for (const action of ["skip", "escape", "reduceMotion"]) {
+test("logo error, skip and Escape release input blocking", async () => {
+  for (const action of ["skip", "escape"]) {
     const intro = await mount({ cached: false });
     try { await intro.fail(); assert.equal(intro.phase(), "playing"); await intro[action](); assert.equal(intro.phase(), "done"); assert.equal(intro.blocked(), false); await intro.advance(5000); assert.equal(intro.phase(), "done"); if (action !== "reduceMotion") assert.equal(intro.focusCount(), 1); } finally { await intro.cleanup(); }
   }
 });
-test("reduced-motion users land immediately, and Strict Mode leaves one live exit timer", async () => {
+test("reduced-motion users still see the two-second opening, and Strict Mode leaves one live exit timer", async () => {
   const reduced = await mount({ reduced: true });
-  try { assert.equal(reduced.phase(), "done"); assert.equal(reduced.blocked(), false); assert.equal(reduced.timers.size, 0); } finally { await reduced.cleanup(); }
+  try { assert.equal(reduced.phase(), "playing"); assert.equal(reduced.blocked(), true); await reduced.advance(1999); assert.equal(reduced.phase(), "playing"); await reduced.advance(1); assert.equal(reduced.phase(), "done"); assert.equal(reduced.blocked(), false); } finally { await reduced.cleanup(); }
   const strict = await mount({ strict: true });
   try { assert.equal(strict.phase(), "playing"); assert.equal(strict.timers.size, 1); await strict.advance(2000); assert.equal(strict.phase(), "done"); } finally { await strict.cleanup(); }
 });
@@ -94,4 +94,8 @@ test("page readiness changes only after the opening, and character spans retain 
     await intro.replay(); assert.equal(intro.ready(), "false");
     await intro.skip(); assert.equal(intro.ready(), "true");
   } finally { await intro.cleanup(); }
+});
+
+test("changing motion preference does not silently suppress an active opening",async()=>{
+ const intro=await mount();try{await intro.advance(500);await intro.reduceMotion();assert.equal(intro.phase(),"playing");await intro.advance(1500);assert.equal(intro.phase(),"done");}finally{await intro.cleanup()}
 });

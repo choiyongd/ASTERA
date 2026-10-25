@@ -27,6 +27,13 @@
 @keyframes brand-letter-render-play{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
 @keyframes brand-trace-render{from{transform:scaleX(0)}to{transform:scaleX(1)}}
 @keyframes brand-trace-render-play{from{transform:scaleX(0)}to{transform:scaleX(1)}}
-@media(prefers-reduced-motion:reduce){.brand-intro{display:none}.brand-intro,.brand-intro *{animation:none!important}}
+/* Keep the requested opening visible; reduce motion rather than hiding the brand. */
+@media(prefers-reduced-motion:reduce){
+ .brand-intro{animation-duration:2s!important}
+ .brand-intro[data-phase="playing"]{animation:brand-intro-exit 2s linear both!important}
+ .brand-intro[data-phase="waiting"]{animation:none!important}
+ .brand-intro :is(.brand-intro-logo,.brand-intro-wordmark,.brand-intro-letter,.brand-intro-trace span){animation:none!important;opacity:1;transform:none;clip-path:none}
+ .brand-intro[data-phase="waiting"] :is(.brand-intro-logo,.brand-intro-wordmark,.brand-intro-letter,.brand-intro-trace span){opacity:0}
+}
 @media print{.brand-intro{display:none!important}}
 @media(max-height:500px){.brand-intro-center{padding:16px 22px}.brand-intro-logo{width:min(340px,65vw)}.brand-intro-tagline{font-size:22px;line-height:1.5;margin-top:16px}.brand-intro-trace{margin-top:18px}}
