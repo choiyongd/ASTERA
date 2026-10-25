@@ -511,7 +511,9 @@ export default function LessonEditor({
                             ? "HTML 웹앱"
                             : a?.kind === "lab"
                               ? "ASTERA LAB"
-                              : "외부 웹앱"}
+                              : a?.kind === "reading"
+                                ? "읽기 자료 · 출처"
+                                : "외부 웹앱"}
                         <button
                           type="button"
                           aria-label={`${m.label} 연결 해제`}
