@@ -35,7 +35,11 @@ export async function GET(request, { params }) {
       headers["Content-Security-Policy"] =
         "sandbox allow-scripts; default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob: https:; font-src data:; connect-src 'none'; frame-ancestors 'self'; base-uri 'none'; form-action 'none'";
     else {
-      headers["Content-Disposition"] = "inline";
+      headers["Content-Disposition"] =
+        new URL(request.url).searchParams.get("download") === "1"
+          ? "attachment; filename=\"ASTERA-material.pdf\"; filename*=UTF-8''" +
+            encodeURIComponent(asset.original_name || "ASTERA-material.pdf")
+          : "inline";
       for (const key of ["accept-ranges", "content-range", "content-length"])
         if (file.headers.has(key)) headers[key] = file.headers.get(key);
     }
