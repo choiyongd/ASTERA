@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { learningContext, dbCheck } from "@/lib/learning/server";
-import { ACCESS } from "@/lib/learning/domain.mjs";
+import LessonList from "./lesson-list";
 import AdminGate from "./admin-gate";
 export const metadata = { title: "학습자료 관리 | ASTERA" };
 export default async function AdminPage() {
@@ -16,7 +16,7 @@ export default async function AdminPage() {
     [lessons, catalog] = await Promise.all([
       ctx.db
         .from("learning_lessons")
-        .select("id,draft,revision,updated_at")
+        .select("id,draft,source,review_status,revision,updated_at")
         .order("updated_at", { ascending: false }),
       ctx.db.from("learning_catalog").select("*"),
     ]);
@@ -33,9 +33,14 @@ export default async function AdminPage() {
           <h1>학습자료 관리</h1>
           <p>자료를 연결하고, 한 주제의 배움으로 엮으세요.</p>
         </div>
-        <Link className="learning-button" href="/admin/lessons/new">
-          새 주제 만들기 +
-        </Link>
+        <div className="learning-actions">
+          <Link className="learning-button secondary" href="/admin/import">
+            교양 정거장 가져오기
+          </Link>
+          <Link className="learning-button" href="/admin/lessons/new">
+            새 주제 만들기 +
+          </Link>
+        </div>
       </header>
       <div className="learning-toolbar">
         <span>
@@ -56,59 +61,23 @@ export default async function AdminPage() {
             </Link>
           </div>
         ) : (
-          <div className="learning-table-wrap">
-            <table className="learning-table">
-              <thead>
-                <tr>
-                  <th>학습 주제</th>
-                  <th>공개 범위</th>
-                  <th>발행 상태</th>
-                  <th>최근 변경</th>
-                  <th>
-                    <span className="learning-sr">관리</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {lessons.data.map((lesson) => {
-                  const pub = catalog.data.find(
-                    (c) => c.lesson_id === lesson.id,
-                  );
-                  return (
-                    <tr key={lesson.id}>
-                      <td>
-                        <b>{lesson.draft.title}</b>
-                        <small>{lesson.draft.universe} · 20분</small>
-                      </td>
-                      <td>{ACCESS[lesson.draft.access]}</td>
-                      <td>
-                        <span
-                          className={`learning-tag ${pub ? "published" : ""}`}
-                        >
-                          {pub ? `발행 v${pub.version}` : "초안"}
-                        </span>
-                      </td>
-                      <td>
-                        {new Intl.DateTimeFormat("ko-KR", {
-                          timeZone: "Asia/Seoul",
-                          month: "short",
-                          day: "numeric",
-                        }).format(new Date(lesson.updated_at))}
-                      </td>
-                      <td>
-                        <Link
-                          href={`/admin/lessons/${lesson.id}`}
-                          className="learning-text-link"
-                        >
-                          편집 →
-                        </Link>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+          <LessonList
+            items={lessons.data.map((lesson) => {
+              const pub = catalog.data.find((c) => c.lesson_id === lesson.id);
+              return {
+                id: lesson.id,
+                title: lesson.draft.title,
+                access: lesson.draft.access,
+                universe: lesson.draft.universe,
+                updatedAt: lesson.updated_at,
+                category: lesson.source?.category || null,
+                stationId: lesson.source?.station_id || null,
+                source: Boolean(lesson.source),
+                reviewed: lesson.review_status === "reviewed",
+                version: pub?.version || null,
+              };
+            })}
+          />
         )}
       </div>
       <p className="learning-footnote">

@@ -29,6 +29,12 @@ export default function LessonEditor({
     [draft, setDraft] = useState(
       initialLesson?.draft || initialDraft || newDraft(),
     );
+  const [teacherNotes, setTeacherNotes] = useState(
+    initialLesson?.teacher_notes || "",
+  );
+  const [sourceReviewed, setSourceReviewed] = useState(
+    initialLesson?.review_status === "reviewed",
+  );
   const [assets, setAssets] = useState(initialAssets),
     [dirty, setDirty] = useState(false),
     [busy, setBusy] = useState(false);
@@ -89,6 +95,7 @@ export default function LessonEditor({
       lesson ? `/api/admin/lessons/${lesson.id}` : "/api/admin/lessons",
       {
         draft: valid,
+        ...(lesson?.source ? { teacherNotes, sourceReviewed } : {}),
         revision: lesson?.revision,
         labId: lesson ? undefined : linkedLabId,
       },
@@ -289,6 +296,56 @@ export default function LessonEditor({
                 />
               </label>
             </section>
+            {lesson?.source && (
+              <section className="learning-panel">
+                <p className="learning-kicker">
+                  SOURCE / {lesson.source.station_id}
+                </p>
+                <h2>교사용 발문·예상 답·검수 사항</h2>
+                <p>
+                  {lesson.source.category} · {lesson.source.volume}권 · PDF{" "}
+                  {lesson.source.pages.join(", ")}쪽
+                </p>
+                <p className="learning-note">
+                  원문 40분 활동을 20분 핵심 탐구와 추가 활동으로 옮긴
+                  초안이에요. 아래 교사판은 관리자만 볼 수 있으며 학습자에게
+                  발행되지 않아요.
+                </p>
+                <label>
+                  교사용 해설·발문 편집
+                  <textarea
+                    rows={16}
+                    maxLength={18000}
+                    value={teacherNotes}
+                    onChange={(e) => {
+                      setTeacherNotes(e.target.value);
+                      setDirty(true);
+                    }}
+                  />
+                </label>
+                <details>
+                  <summary>학생판 추출 원문 대조</summary>
+                  <p className="learning-prose">
+                    {lesson.source.original_student}
+                  </p>
+                </details>
+                <p className="learning-hint">
+                  {lesson.source.license} · 출처와 비영리 이용 조건을
+                  유지해주세요. 학습 안내와 질문은 아래에서 수정할 수 있어요.
+                </p>
+                <label className="learning-review-check">
+                  <input
+                    type="checkbox"
+                    checked={sourceReviewed}
+                    onChange={(e) => {
+                      setSourceReviewed(e.target.checked);
+                      setDirty(true);
+                    }}
+                  />{" "}
+                  학생용 내용·교사용 검수 사항과 출처·이용 조건을 확인했어요.
+                </label>
+              </section>
+            )}
             <section className="learning-panel">
               <h2>02. 20분 학습 흐름</h2>
               <p className="learning-hint">

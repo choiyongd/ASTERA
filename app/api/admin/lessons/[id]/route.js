@@ -5,6 +5,10 @@ import {
   validId,
   LearningError,
 } from "@/lib/learning/server";
+import {
+  validateTeacherNotes,
+  validateSourcePublication,
+} from "@/lib/learning/stations.mjs";
 import { validateDraft } from "@/lib/learning/domain.mjs";
 export async function PATCH(request, { params }) {
   return learningAction(request, async ({ db }) => {
@@ -15,9 +19,10 @@ export async function PATCH(request, { params }) {
       throw new LearningError("자료 버전을 확인해주세요.");
     if (body.action === "publish") {
       const row = dbCheck(
-        await db.from("learning_lessons").select("draft").eq("id", id).single(),
+        await db.from("learning_lessons").select("*").eq("id", id).single(),
       );
       validateDraft(row.draft, true);
+      validateSourcePublication(row);
       const catalog = dbCheck(
         await db.rpc("learning_publish", {
           p_id: id,
@@ -40,6 +45,12 @@ export async function PATCH(request, { params }) {
         await db.rpc("learning_save_draft", {
           p_id: id,
           p_draft: validateDraft(body.draft),
+          ...(body.teacherNotes !== undefined
+            ? { p_teacher_notes: validateTeacherNotes(body.teacherNotes) }
+            : {}),
+          ...(typeof body.sourceReviewed === "boolean"
+            ? { p_review_status: body.sourceReviewed ? "reviewed" : "pending" }
+            : {}),
           p_revision: body.revision,
         }),
       ),
