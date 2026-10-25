@@ -1,3 +1,5 @@
+import { stationFixture } from "./stations.test.mjs";
+import { stationUuid } from "../lib/learning/station-ids.mjs";
 import { loadLabRoute } from "./load-lab-routes.mjs";
 import { lessonDraftFromLab } from "../lib/lab/learning-draft.mjs";
 import { getLabTopic } from "../lib/lab/catalog.mjs";
@@ -189,24 +191,85 @@ test("Firebase rules enforce draft isolation, memberships, immutable uploads and
       getDocs(collection(guest.firestore(), "lab_content_publications")),
     );
 
-    const apiStore=new FirebaseStore(adminCtx.firestore(),"admin"),api=await loadLabRoute("app/api/admin/labs/[labId]/route.js",{db:apiStore});
-    const apiCopy=defaultLabContent("science-001");apiCopy.fields.initial.label="수정한 API 발문";
-    const call=async(action,revision,content=apiCopy)=>{const response=await api.POST(new Request("http://localhost/api/admin/labs/science-001",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action,revision,content})}),{params:Promise.resolve({labId:"science-001"})});return{status:response.status,data:await response.json()}};
-    const savedCopy=await call("save",0);assert.equal(savedCopy.status,200);assert.equal(savedCopy.data.revision,1);
-    assert.equal((await getDoc(doc(guest.firestore(),"lab_content_publications","science-001"))).exists(),false);
-    assert.equal((await call("publish",1)).status,200);
-    const publishedApi=(await getDoc(doc(guest.firestore(),"lab_content_publications","science-001"))).data();
-    assert.equal(JSON.parse(publishedApi.content_json).fields.initial.label,"수정한 API 발문");
-    assert.equal((await call("save",1)).status,409);
-    apiCopy.fields.initial.label="공개되면 안 되는 다음 초안";assert.equal((await call("save",2)).status,200);
-    assert.equal((await getDoc(doc(guest.firestore(),"lab_content_publications","science-001"))).data().content_json,publishedApi.content_json);
-    const createRoute=await loadLabRoute("app/api/admin/lessons/route.js",{db:apiStore});
-    const prepared=lessonDraftFromLab(getLabTopic("science-001"),apiCopy);
-    const createdResponse=await createRoute.POST(new Request("http://localhost/api/admin/lessons",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({draft:prepared.draft,labId:"science-001"})}));
-    assert.equal(createdResponse.status,200);const linked=await createdResponse.json();
-    assert.equal(linked.lesson.draft.materials[0].id,linked.assets[0].id);
-    assert.equal((await getDoc(doc(adminCtx.firestore(),"learning_assets",linked.assets[0].id))).data().external_url,"/lab/science-001");
-    assert.equal((await getDoc(doc(adminCtx.firestore(),"learning_lessons",linked.lesson.id))).data().draft.title,apiCopy.question);
+    const apiStore = new FirebaseStore(adminCtx.firestore(), "admin"),
+      api = await loadLabRoute("app/api/admin/labs/[labId]/route.js", {
+        db: apiStore,
+      });
+    const apiCopy = defaultLabContent("science-001");
+    apiCopy.fields.initial.label = "수정한 API 발문";
+    const call = async (action, revision, content = apiCopy) => {
+      const response = await api.POST(
+        new Request("http://localhost/api/admin/labs/science-001", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action, revision, content }),
+        }),
+        { params: Promise.resolve({ labId: "science-001" }) },
+      );
+      return { status: response.status, data: await response.json() };
+    };
+    const savedCopy = await call("save", 0);
+    assert.equal(savedCopy.status, 200);
+    assert.equal(savedCopy.data.revision, 1);
+    assert.equal(
+      (
+        await getDoc(
+          doc(guest.firestore(), "lab_content_publications", "science-001"),
+        )
+      ).exists(),
+      false,
+    );
+    assert.equal((await call("publish", 1)).status, 200);
+    const publishedApi = (
+      await getDoc(
+        doc(guest.firestore(), "lab_content_publications", "science-001"),
+      )
+    ).data();
+    assert.equal(
+      JSON.parse(publishedApi.content_json).fields.initial.label,
+      "수정한 API 발문",
+    );
+    assert.equal((await call("save", 1)).status, 409);
+    apiCopy.fields.initial.label = "공개되면 안 되는 다음 초안";
+    assert.equal((await call("save", 2)).status, 200);
+    assert.equal(
+      (
+        await getDoc(
+          doc(guest.firestore(), "lab_content_publications", "science-001"),
+        )
+      ).data().content_json,
+      publishedApi.content_json,
+    );
+    const createRoute = await loadLabRoute("app/api/admin/lessons/route.js", {
+      db: apiStore,
+    });
+    const prepared = lessonDraftFromLab(getLabTopic("science-001"), apiCopy);
+    const createdResponse = await createRoute.POST(
+      new Request("http://localhost/api/admin/lessons", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ draft: prepared.draft, labId: "science-001" }),
+      }),
+    );
+    assert.equal(createdResponse.status, 200);
+    const linked = await createdResponse.json();
+    assert.equal(linked.lesson.draft.materials[0].id, linked.assets[0].id);
+    assert.equal(
+      (
+        await getDoc(
+          doc(adminCtx.firestore(), "learning_assets", linked.assets[0].id),
+        )
+      ).data().external_url,
+      "/lab/science-001",
+    );
+    assert.equal(
+      (
+        await getDoc(
+          doc(adminCtx.firestore(), "learning_lessons", linked.lesson.id),
+        )
+      ).data().draft.title,
+      apiCopy.question,
+    );
     const admin = adminCtx.firestore(),
       store = new FirebaseStore(admin, "admin");
     await assertSucceeds(
@@ -412,6 +475,95 @@ test("Firebase rules enforce draft isolation, memberships, immutable uploads and
     );
     await assertFails(
       getDoc(doc(member.firestore(), "learning_assets", assetId)),
+    );
+
+    // Exercise real import and edit handlers against the rules, without an Admin SDK bypass.
+    const importRoute = await loadLabRoute("app/api/admin/stations/route.js", {
+      db: store,
+    });
+    const entries = [91, 92, 93, 94, 95].map(stationFixture);
+    const req = (entries) =>
+      new Request("http://localhost/api/admin/stations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ format: "astera-stations/v1", entries }),
+      });
+    let imported = await importRoute.POST(req(entries));
+    assert.equal(imported.status, 200);
+    assert.deepEqual(
+      (await imported.json()).results.map((r) => r.status),
+      Array(5).fill("created"),
+    );
+    const importedId = stationUuid(entries[0].stationId),
+      importedAsset = stationUuid(entries[0].stationId + ":source");
+    await assertFails(
+      getDoc(doc(member.firestore(), "learning_lessons", importedId)),
+    );
+    await assertFails(
+      getDoc(doc(guest.firestore(), "learning_assets", importedAsset)),
+    );
+    const privateCourse = (
+      await getDoc(doc(adminCtx.firestore(), "learning_lessons", importedId))
+    ).data();
+    const editRoute = await loadLabRoute(
+      "app/api/admin/lessons/[id]/route.js",
+      { db: store },
+    );
+    const patch = (body) =>
+      editRoute.PATCH(
+        new Request("http://localhost/api/admin/lessons/" + importedId, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        }),
+        { params: Promise.resolve({ id: importedId }) },
+      );
+    assert.equal((await patch({ action: "publish", revision: 1 })).status, 400);
+    const savedImport = await patch({
+      draft: { ...privateCourse.draft, title: "관리자가 직접 다듬은 제목" },
+      teacherNotes: "관리자가 직접 수정한 해설",
+      sourceReviewed: true,
+      revision: 1,
+    });
+    assert.equal(savedImport.status, 200);
+    const repeated = await importRoute.POST(req(entries));
+    assert.equal(repeated.status, 200);
+    assert.deepEqual(
+      (await repeated.json()).results.map((r) => r.status),
+      Array(5).fill("skipped"),
+    );
+    const kept = (
+      await getDoc(doc(adminCtx.firestore(), "learning_lessons", importedId))
+    ).data();
+    assert.equal(kept.teacher_notes, "관리자가 직접 수정한 해설");
+    assert.equal(kept.draft.title, "관리자가 직접 다듬은 제목");
+    assert.equal(kept.revision, 2);
+    const failedImport = await (
+      await loadLabRoute("app/api/admin/stations/route.js", {
+        db: new FirebaseStore(member.firestore(), "member"),
+      })
+    ).POST(req([stationFixture(96)]));
+    assert.notEqual(failedImport.status, 200);
+    const sourcePub = await patch({ action: "publish", revision: 2 });
+    assert.equal(sourcePub.status, 200);
+    const sourceCatalog = (await sourcePub.json()).catalog;
+    const learnerRelease = (
+      await getDoc(
+        doc(member.firestore(), "learning_releases", sourceCatalog.release_id),
+      )
+    ).data();
+    assert.equal(learnerRelease.content.teacher_notes, undefined);
+    assert.equal(learnerRelease.content.source, undefined);
+    assert.equal(
+      (
+        await getDoc(doc(member.firestore(), "learning_assets", importedAsset))
+      ).data().body_text,
+      entries[0].sourceReading,
+    );
+    await assertFails(
+      getDoc(
+        doc(guest.firestore(), "learning_releases", sourceCatalog.release_id),
+      ),
     );
   } finally {
     await env.cleanup();

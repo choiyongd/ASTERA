@@ -503,6 +503,12 @@ export default function LearningPlayer({
 }
 function LearningMaterial({ material }) {
   const [open, setOpen] = useState(false);
+  if (material.kind === 'reading') return (
+    <article className="learning-material">
+      <p className="learning-kicker">READ / SOURCES</p>
+      <details><summary>{material.label}</summary><p className="learning-prose">{material.body_text}</p></details>
+    </article>
+  );
   const href =
     material.kind === "link" || material.kind === "lab"
       ? material.external_url
