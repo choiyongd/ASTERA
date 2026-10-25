@@ -1,6 +1,7 @@
 import Link from "next/link";
+import SessionRecovery from "./session-recovery";
 import EmailVerification from "../account/components/email-verification";
-export default function AdminGate({ configured, user, unavailable = false }) {
+export default function AdminGate({ configured, user, unavailable = false, sessionExpired = false }) {
   return (
     <main className="learning-shell">
       <p className="learning-kicker">ASTERA STUDIO</p>
@@ -15,7 +16,7 @@ export default function AdminGate({ configured, user, unavailable = false }) {
             : !user
               ? "관리자 계정으로 로그인해주세요"
               : unavailable
-                ? "학습 데이터베이스 설정이 필요해요"
+                ? "학습자료를 불러오지 못했어요"
                 : "관리자 권한이 필요해요"}
         </h2>
         <p>
@@ -24,9 +25,10 @@ export default function AdminGate({ configured, user, unavailable = false }) {
             : !user
               ? "자료 등록과 발행은 지정된 관리자만 할 수 있어요."
               : unavailable
-                ? "운영자가 학습자료용 데이터베이스 설정을 완료해야 해요."
+                ? "일시적인 연결 문제일 수 있어요. 로그인 상태를 확인하고 다시 불러와주세요."
                 : "로그인한 계정을 자료 관리자로 지정한 뒤 다시 접속해주세요."}
         </p>
+        {configured && (unavailable || sessionExpired) && <SessionRecovery />}
         {!user && configured ? (
           <Link className="learning-button" href="/admin/login">
             로그인

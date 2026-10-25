@@ -3,6 +3,7 @@ import "./brand-intro.css";
 import "./site-motion.css";
 import BrandIntro from "./brand-intro";
 import SiteMotion from "./site-motion";
+import SessionBridge from "./session-bridge";
 
 export const metadata = {
   title: "ASTERA — 궁금함이 배움이 되는 곳",
@@ -25,7 +26,7 @@ export default function RootLayout({ children }) {
           rel="stylesheet"
         />
       </head>
-      <body><BrandIntro><SiteMotion>{children}</SiteMotion></BrandIntro></body>
+      <body><SessionBridge /><BrandIntro><SiteMotion>{children}</SiteMotion></BrandIntro></body>
     </html>
   );
 }

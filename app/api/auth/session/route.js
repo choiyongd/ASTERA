@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { firebaseSession } from "@/lib/firebase/server";
+import { usableSessionToken, sessionCookieAge } from "@/lib/firebase/session-token.mjs";
 const COOKIE = "astera_session";
 function check(request) {
   const origin = request.headers.get("origin");
@@ -21,6 +22,8 @@ export async function POST(request) {
         { error: "로그인을 다시 시도해주세요." },
         { status: 400 },
       );
+    if (!usableSessionToken(input.idToken)) return Response.json({error:"로그인 상태를 새로 확인해주세요."},{status:401});
+    const changed = (await cookies()).get(COOKIE)?.value !== input.idToken;
     const ctx = await firebaseSession(input.idToken);
     if (!ctx.user)
       return Response.json(
@@ -49,10 +52,10 @@ export async function POST(request) {
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
-      maxAge: 3500,
+      maxAge: sessionCookieAge(input.idToken),
     });
     return Response.json(
-      { user: ctx.user },
+      { user: ctx.user, changed },
       { headers: { "Cache-Control": "private,no-store" } },
     );
   } catch {
@@ -65,6 +68,7 @@ export async function POST(request) {
 export async function DELETE(request) {
   if (!check(request))
     return Response.json({ error: "요청을 확인해주세요." }, { status: 403 });
+  const changed = Boolean((await cookies()).get(COOKIE)?.value);
   (await cookies()).set(COOKIE, "", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
@@ -72,5 +76,5 @@ export async function DELETE(request) {
     path: "/",
     maxAge: 0,
   });
-  return Response.json({ ok: true });
+  return Response.json({ ok: true, changed }, { headers: { "Cache-Control": "private,no-store" } });
 }
