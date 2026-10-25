@@ -20,10 +20,15 @@ export default function LessonEditor({
   releases,
   publication,
   fileUploadsEnabled = false,
+  initialDraft = null,
+  prefillNotice = "",
+  linkedLabId = null,
 }) {
   const router = useRouter();
   const [lesson, setLesson] = useState(initialLesson),
-    [draft, setDraft] = useState(initialLesson?.draft || newDraft());
+    [draft, setDraft] = useState(
+      initialLesson?.draft || initialDraft || newDraft(),
+    );
   const [assets, setAssets] = useState(initialAssets),
     [dirty, setDirty] = useState(false),
     [busy, setBusy] = useState(false);
@@ -82,10 +87,15 @@ export default function LessonEditor({
     const valid = validateDraft(draft);
     const result = await learningRequest(
       lesson ? `/api/admin/lessons/${lesson.id}` : "/api/admin/lessons",
-      { draft: valid, revision: lesson?.revision },
+      {
+        draft: valid,
+        revision: lesson?.revision,
+        labId: lesson ? undefined : linkedLabId,
+      },
       lesson ? "PATCH" : "POST",
     );
     setLesson(result.lesson);
+    if (result.assets) setAssets(result.assets);
     setDraft(result.lesson.draft);
     setDirty(false);
     setMessage("초안을 저장했어요. 발행하면 학습 사이트에 반영돼요.");
@@ -196,6 +206,7 @@ export default function LessonEditor({
           </button>
         </div>
       </header>
+      {prefillNotice && <p className="learning-hint">{prefillNotice}</p>}
       <div role="status" className="learning-status">
         {message || (dirty ? "저장하지 않은 변경이 있어요." : "")}
       </div>

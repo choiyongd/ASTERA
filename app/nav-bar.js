@@ -4,89 +4,188 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/firebase/client";
-import { IconSearch, IconBell, IconUser, IconMenu, IconClose, IconHome, IconCompass, IconCheck, IconChat } from "./icons";
+import { NAV_GROUPS, isCurrentLink } from "@/lib/navigation.mjs";
+import {
+  IconSearch,
+  IconBell,
+  IconUser,
+  IconMenu,
+  IconClose,
+  IconHome,
+  IconCompass,
+  IconCheck,
+} from "./icons";
 
 export default function NavBar() {
-  const [user, setUser] = useState(undefined); // undefined = 확인 중
+  const [user, setUser] = useState(undefined);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [openGroup, setOpenGroup] = useState(null);
   const [bellOpen, setBellOpen] = useState(false);
-  const bellRef = useRef(null);
-  const pathname = usePathname();
-  const router = useRouter();
+  const headerRef = useRef(null),
+    bellRef = useRef(null);
+  const pathname = usePathname(),
+    router = useRouter();
 
   useEffect(() => {
-    // Public LAB activities must work even before auth configuration is installed.
-    if (!process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || !process.env.NEXT_PUBLIC_FIREBASE_API_KEY || !process.env.NEXT_PUBLIC_FIREBASE_APP_ID) {
+    if (
+      !process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ||
+      !process.env.NEXT_PUBLIC_FIREBASE_API_KEY ||
+      !process.env.NEXT_PUBLIC_FIREBASE_APP_ID
+    ) {
       setUser(null);
       return;
     }
     let active = true;
-    const supabase = createClient();
-    supabase.auth.getUser().then(({ data }) => { if (active) setUser(data.user ?? null); }).catch(() => { if (active) setUser(null); });
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+    const client = createClient();
+    client.auth
+      .getUser()
+      .then(({ data }) => {
+        if (active) setUser(data.user ?? null);
+      })
+      .catch(() => {
+        if (active) setUser(null);
+      });
+    const { data: sub } = client.auth.onAuthStateChange((_event, session) => {
       if (active) setUser(session?.user ?? null);
     });
-    return () => { active = false; sub.subscription.unsubscribe(); };
+    return () => {
+      active = false;
+      sub.subscription.unsubscribe();
+    };
   }, []);
-
   useEffect(() => {
-    function onClickOutside(e) {
-      if (bellRef.current && !bellRef.current.contains(e.target)) setBellOpen(false);
+    function outside(event) {
+      if (bellRef.current && !bellRef.current.contains(event.target))
+        setBellOpen(false);
+      if (headerRef.current && !headerRef.current.contains(event.target)) {
+        setOpenGroup(null);
+        setMenuOpen(false);
+      }
     }
-    document.addEventListener("mousedown", onClickOutside);
-    return () => document.removeEventListener("mousedown", onClickOutside);
+    document.addEventListener("pointerdown", outside);
+    return () => document.removeEventListener("pointerdown", outside);
   }, []);
-
   useEffect(() => {
     setMenuOpen(false);
+    setOpenGroup(null);
   }, [pathname]);
-
+  function closeMenus() {
+    setMenuOpen(false);
+    setOpenGroup(null);
+  }
   function goSearch() {
+    closeMenus();
     if (pathname === "/") {
       document.getElementById("hero-search")?.focus();
       document.getElementById("top")?.scrollIntoView({ behavior: "smooth" });
-    } else {
-      router.push("/#top");
+    } else router.push("/#top");
+  }
+  function groupKey(event, id) {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      event.currentTarget.querySelector("button")?.focus();
+      setOpenGroup(null);
+    } else if (event.key === "ArrowDown" && event.target.tagName === "BUTTON") {
+      event.preventDefault();
+      setOpenGroup(id);
+      const group = event.currentTarget;
+      requestAnimationFrame(() => group.querySelector("a")?.focus());
     }
   }
-
-  const NAV_LINKS = [
-    { href: "/about", label: "ASTERA 소개" },
-    { href: "/#discover", label: "탐험하기" },
-    { href: "/#universes", label: "유니버스" },
-    { href: "/lab", label: "ASTERA LAB" },
-    { href: "/learn", label: "20분 학습" },
-    { href: "/#products", label: "학습도구" },
-    { href: "/#community", label: "커뮤니티" },
-    { href: "/pricing", label: "요금제" },
-    { href: "/pages", label: "안내" },
-  ];
-  const isCurrent = (href) => href === "/lab" ? pathname.startsWith("/lab") : pathname === href;
-
   return (
     <>
-      <header className="topbar">
+      <header
+        className="topbar"
+        ref={headerRef}
+        onKeyDown={(event) => {
+          if (event.key === "Escape") {
+            closeMenus();
+            setBellOpen(false);
+          }
+        }}
+      >
         <div className="wrap nav">
-          <Link className="brand" href="/" aria-label="ASTERA 홈">
-            <img className="brand-logo" src="/brand/astera_logo_reversed_transparent.png" alt="ASTERA" width={160} height={36} />
+          <Link
+            className="brand"
+            href="/"
+            aria-label="ASTERA 홈"
+            onClick={closeMenus}
+          >
+            <img
+              className="brand-logo"
+              src="/brand/astera_logo_reversed_transparent.png"
+              alt="ASTERA"
+              width={160}
+              height={36}
+            />
             <span className="beta-badge">BETA</span>
           </Link>
-
           <nav className="navlinks" aria-label="상단 메뉴">
-            {NAV_LINKS.map((l) => (
-              <Link key={l.label} href={l.href} aria-current={isCurrent(l.href) ? "page" : undefined}>
-                {l.label}
-              </Link>
+            {NAV_GROUPS.map((group) => (
+              <div
+                className="nav-group"
+                key={group.id}
+                onMouseEnter={() => setOpenGroup(group.id)}
+                onMouseLeave={() => setOpenGroup(null)}
+                onFocusCapture={(event) => {
+                  if (!event.currentTarget.contains(event.relatedTarget))
+                    setOpenGroup(group.id);
+                }}
+                onBlurCapture={(event) => {
+                  if (!event.currentTarget.contains(event.relatedTarget))
+                    setOpenGroup(null);
+                }}
+                onKeyDown={(event) => groupKey(event, group.id)}
+              >
+                <button
+                  className="nav-group-trigger"
+                  type="button"
+                  aria-expanded={openGroup === group.id}
+                  aria-controls={"nav-" + group.id}
+                  data-current={
+                    group.items.some((item) =>
+                      isCurrentLink(pathname, item.href),
+                    ) || undefined
+                  }
+                  onClick={() => setOpenGroup(group.id)}
+                >
+                  {group.label}
+                  <span className="nav-chevron" aria-hidden="true" />
+                </button>
+                <div
+                  className="nav-dropdown"
+                  id={"nav-" + group.id}
+                  hidden={openGroup !== group.id}
+                >
+                  {group.items.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={
+                        item.secondary ? "nav-secondary-item" : undefined
+                      }
+                      aria-current={
+                        isCurrentLink(pathname, item.href) ? "page" : undefined
+                      }
+                      onClick={closeMenus}
+                    >
+                      <b>{item.label}</b>
+                      {item.hint && <small>{item.hint}</small>}
+                    </Link>
+                  ))}
+                </div>
+              </div>
             ))}
           </nav>
-
           <div className="nav-actions">
             <button className="icon-btn" aria-label="검색" onClick={goSearch}>
               <IconSearch width={19} height={19} />
             </button>
-
-            {user === undefined && <span className="pill" style={{ visibility: "hidden" }}>회원가입</span>}
-
+            {user === undefined && (
+              <span className="pill" style={{ visibility: "hidden" }}>
+                회원가입
+              </span>
+            )}
             {user === null && (
               <>
                 <Link className="navlinks-login" href="/login">
@@ -97,11 +196,15 @@ export default function NavBar() {
                 </Link>
               </>
             )}
-
             {user && (
               <>
                 <div className="bell-wrap" ref={bellRef}>
-                  <button className="icon-btn" aria-label="알림" onClick={() => setBellOpen((v) => !v)}>
+                  <button
+                    className="icon-btn"
+                    aria-label="알림"
+                    aria-expanded={bellOpen}
+                    onClick={() => setBellOpen((value) => !value)}
+                  >
                     <IconBell width={19} height={19} />
                   </button>
                   {bellOpen && (
@@ -111,65 +214,104 @@ export default function NavBar() {
                     </div>
                   )}
                 </div>
-                <Link className="avatar-btn" href="/account" aria-label="내 계정">
+                <Link
+                  className="avatar-btn"
+                  href="/account"
+                  aria-label="마이페이지"
+                >
                   <IconUser width={17} height={17} />
                 </Link>
               </>
             )}
-
-            <button className="icon-btn menu-btn" aria-label="메뉴" aria-expanded={menuOpen} aria-controls="mobile-menu" onClick={() => setMenuOpen((v) => !v)}>
-              {menuOpen ? <IconClose width={19} height={19} /> : <IconMenu width={19} height={19} />}
+            <button
+              className="icon-btn menu-btn"
+              aria-label="메뉴"
+              aria-expanded={menuOpen}
+              aria-controls="mobile-menu"
+              onClick={() => {
+                setMenuOpen((value) => !value);
+                setOpenGroup(null);
+              }}
+            >
+              {menuOpen ? (
+                <IconClose width={19} height={19} />
+              ) : (
+                <IconMenu width={19} height={19} />
+              )}
             </button>
           </div>
         </div>
-
         {menuOpen && (
-          <div className="mobile-menu" id="mobile-menu">
-            {NAV_LINKS.map((l) => (
-              <Link key={l.label} href={l.href} aria-current={isCurrent(l.href) ? "page" : undefined} onClick={() => setMenuOpen(false)}>
-                {l.label}
-              </Link>
+          <nav
+            className="mobile-menu"
+            id="mobile-menu"
+            aria-label="모바일 전체 메뉴"
+          >
+            {NAV_GROUPS.map((group, index) => (
+              <details
+                className="mobile-nav-group"
+                key={group.id}
+                name="mobile-navigation"
+                open={index === 0}
+              >
+                <summary>
+                  {group.label}
+                  <span className="nav-chevron" aria-hidden="true" />
+                </summary>
+                {group.items.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    aria-current={
+                      isCurrentLink(pathname, item.href) ? "page" : undefined
+                    }
+                    onClick={closeMenus}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </details>
             ))}
             <div className="mobile-menu-divider" />
             {user ? (
-              <Link href="/account" onClick={() => setMenuOpen(false)}>
-                내 계정
+              <Link href="/account" onClick={closeMenus}>
+                마이페이지
               </Link>
             ) : (
               <>
-                <Link href="/login" onClick={() => setMenuOpen(false)}>
+                <Link href="/login" onClick={closeMenus}>
                   로그인
                 </Link>
-                <Link href="/signup" onClick={() => setMenuOpen(false)}>
+                <Link href="/signup" onClick={closeMenus}>
                   회원가입
                 </Link>
               </>
             )}
-          </div>
+          </nav>
         )}
       </header>
-
       <nav className="tabbar" aria-label="모바일 하단 메뉴">
-        <Link href="/" className={pathname === "/" ? "active" : ""}>
-          <IconHome width={20} height={20} />
-          <span>홈</span>
-        </Link>
-        <Link href="/lab" className={pathname.startsWith("/lab") ? "active" : ""} aria-current={pathname.startsWith("/lab") ? "page" : undefined}>
-          <IconCompass width={20} height={20} />
-          <span>LAB</span>
-        </Link>
-        <Link href="/account" className={pathname === "/account" ? "active" : ""}>
-          <IconCheck width={20} height={20} />
-          <span>내 활동</span>
-        </Link>
-        <Link href="/#community">
-          <IconChat width={20} height={20} />
-          <span>커뮤니티</span>
-        </Link>
-        <Link href="/account" className={pathname === "/account" ? "active" : ""}>
-          <IconUser width={20} height={20} />
-          <span>MY</span>
-        </Link>
+        {[
+          ["/", "홈", IconHome],
+          ["/lab", "LAB", IconCompass],
+          ["/learn", "학습", IconCompass],
+          ["/learn/records", "기록", IconCheck],
+          ["/account", "MY", IconUser],
+        ].map(([href, label, Icon]) => {
+          const current =
+            href === "/" ? pathname === "/" : isCurrentLink(pathname, href);
+          return (
+            <Link
+              key={href}
+              href={href}
+              className={current ? "active" : ""}
+              aria-current={current ? "page" : undefined}
+            >
+              <Icon width={20} height={20} />
+              <span>{label}</span>
+            </Link>
+          );
+        })}
       </nav>
     </>
   );

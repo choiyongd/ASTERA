@@ -1264,3 +1264,5 @@
     font-size: 28px;
   }
 }
+
+.learning-stage-editor-nav{display:flex;flex-wrap:wrap;gap:8px;margin:24px 0}.lab-editor-prompt{margin-top:24px;padding-top:18px;border-top:1px solid #e7e9f3}.lab-related-lessons{display:grid;gap:10px}.lab-management-guide{margin-bottom:24px}.lab-management-guide li{line-height:1.9;margin-bottom:8px}.lab-management-guide p{color:#52677e;font-size:14px;line-height:1.8}.learning-preview-note{padding:18px 22px;border-bottom:1px solid #e7e9f3;font-size:14px}

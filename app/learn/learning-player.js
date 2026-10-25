@@ -516,6 +516,15 @@ function LearningMaterial({ material }) {
           </p>
           <h3>{material.label}</h3>
         </div>
+        {material.kind === "pdf" && (
+          <a
+            className="learning-text-link"
+            href={href + "?download=1"}
+            download
+          >
+            PDF 내려받기 ↓
+          </a>
+        )}
         <button
           type="button"
           className="learning-button secondary"
