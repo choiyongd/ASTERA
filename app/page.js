@@ -6,6 +6,7 @@ import { filterLibrary } from "@/lib/library-search.mjs";
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import NavBar from "./nav-bar";
+import { MEMBERSHIP_PLAN } from "@/lib/membership";
 import BrandFooter from "./brand-footer";
 import RadarChart from "./radar-chart";
 import ContentTile from "./content-tile";
@@ -555,7 +556,7 @@ export default function HomePage() {
               <h3>Workbook + Worksheet</h3>
               <p>읽기·생각·토론·쓰기·설계를 한 번에. 짧은 워크시트도 함께 제공합니다.</p>
               <div className="price">
-                <Link href="/pricing">월 9,900원 · 자세히 →</Link>
+                <Link href="/pricing">월 {MEMBERSHIP_PLAN.amount.toLocaleString("ko-KR")}원 · 자세히 →</Link>
               </div>
             </div>
             <div className="product">
