@@ -21,7 +21,7 @@ export default function LearningCharts({ analytics }) {
       >
         {[
           ["universe", "유니버스별 학습"],
-          ["competency", "역량 변화"],
+          ["competency", "자신감 변화"],
           ["history", "학습 흐름"],
         ].map(([id, label]) => (
           <button
@@ -46,8 +46,8 @@ export default function LearningCharts({ analytics }) {
           <>
             <h2>여덟 개의 렌즈, 나의 탐구 정도</h2>
             <p className="learning-hint">
-              현재 발행된 과정 중 완료한 비율이에요. 새 발행본은 다시 학습할 수
-              있어요.
+              현재 공개된 발행본 중 완료한 비율이에요. 새 발행본은 다시 학습할 수 있어요.
+              지금까지 완료한 주제 수는 위의 ‘완료한 주제’에 쌓여요.
             </p>
             <div className="learning-universe-chart">
               {analytics.universes.map((u) => (

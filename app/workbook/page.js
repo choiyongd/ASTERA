@@ -1,13 +1,13 @@
 export const dynamic="force-dynamic";
-import { redirect } from "next/navigation";
 import Link from "next/link";
 import NavBar from "../nav-bar";
 import { learningContext } from "@/lib/learning/server";
 import { MEMBERSHIP_PLAN } from "@/lib/membership";
+import { membershipSalesReady } from "@/lib/membership-status";
 
 export default async function WorkbookPage() {
-  const { user, profile, admin } = await learningContext();
-  if(!user) redirect("/login?next=/workbook");
+  const { profile } = await learningContext();
+  const ready = membershipSalesReady();
 
   const isMember =
     profile?.is_member && profile?.membership_expires_at && new Date(profile.membership_expires_at) > new Date();
@@ -17,28 +17,39 @@ export default async function WorkbookPage() {
       <NavBar />
       <div className="wrap page-hero">
         <h1>가장 튼튼한 다리는 어떻게 만들까?</h1>
-        <p>MAKE · ENGINEERING · 9–14세 · 35분 — 워크북 멤버십 전용 콘텐츠입니다.</p>
+        <p>공학 · 초등 3–6학년·중학생 · 워크북 미리보기</p>
       </div>
 
       {!isMember && (
         <div className="wrap" style={{ paddingBottom: 90 }}>
           <div className="paywall">
-            <span className="eyebrow">멤버십 전용</span>
-            <h2>워크북을 계속 보려면 멤버십이 필요해요</h2>
+            <span className="eyebrow">{ready ? "멤버십 전용" : "출시 준비 중"}</span>
+            <h2>{ready ? "워크북과 함께 더 탐구해 보세요" : "워크북을 미리 살펴보세요"}</h2>
             <p>
-              읽기·생각·토론·쓰기·설계 워크시트 전체와 앞으로 추가되는 모든 질문 워크북을{" "}
-              {MEMBERSHIP_PLAN.durationDays}일 동안 자유롭게 이용할 수 있어요.
+              다리의 모양과 힘이 작용하는 곳을 살펴보고, 구조를 바꾸어 비교하는 활동을 준비하고 있어요.
             </p>
             <div className="price-tag">
               {MEMBERSHIP_PLAN.amount.toLocaleString("ko-KR")}원<span> / {MEMBERSHIP_PLAN.durationDays}일</span>
             </div>
-            <Link className="primary" href="/checkout">
-              멤버십 시작하기
+            <Link className="primary" href={ready ? "/checkout" : "/lab/engineering-004"}>
+              {ready ? "멤버십 시작하기" : "무료 다리 설계 LAB 해 보기"}
             </Link>
+            {!ready && <p className="membership-availability">30일 이용 예정 가격이에요. 판매가 시작되면 요금제에서 확인할 수 있어요.</p>}
           </div>
         </div>
       )}
 
+      <div className="wrap" style={{ paddingBottom: 90 }}>
+        <section className="worksheet-full">
+          <h2>먼저 생각해 볼 질문</h2>
+          <p>다리를 지나는 짐의 무게가 무거워졌다고 생각해 보세요.</p>
+          <ol>
+            <li>다리의 어느 부분을 더 튼튼하게 해야 할까요? 먼저 이유를 적어 보세요.</li>
+            <li>무료 LAB에서 같은 길이와 재료를 두고 구조를 바꾸어 보세요. 어떤 점이 달라졌나요?</li>
+          </ol>
+          <Link className="learning-text-link" href="/lab/engineering-004">모형을 바꾸어 비교하기 →</Link>
+        </section>
+      </div>
       {isMember && (
         <div className="wrap" style={{ paddingBottom: 90 }}>
           <div className="worksheet-full">

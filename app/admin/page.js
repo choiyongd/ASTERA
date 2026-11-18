@@ -74,6 +74,9 @@ export default async function AdminPage() {
                 stationId: lesson.source?.station_id || null,
                 source: Boolean(lesson.source),
                 reviewed: lesson.review_status === "reviewed",
+                reviewStatus: lesson.review_status || "pending",
+                materialCount: lesson.draft.materials?.length || 0,
+                incomplete: !lesson.draft.goals?.length || lesson.draft.stages.some((s) => !s.body?.trim() || !s.prompt?.trim()),
                 version: pub?.version || null,
               };
             })}

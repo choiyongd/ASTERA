@@ -138,6 +138,12 @@ test("completion and stage advances cannot bypass unanswered stages", () => {
     normalizeProgress({ answers, step: 1, completed: false }),
   );
   for (const s of STAGES) answers[s.id] = "내가 관찰한 근거를 설명합니다.";
+  const optional = normalizeProgress({ answers, step: 4, completed: true });
+  assert.equal(optional.completed, true);
+  assert.deepEqual(optional.assessment.pre, [0, 0, 0, 0]);
+  assert.throws(() => normalizeProgress({
+    answers: { ...answers, question: "\n\n더 생각한 답\n선택 답변만 길게 적어도 기본 질문이 필요합니다." }, step: 1, completed: false,
+  }));
   assert.equal(
     normalizeProgress({
       answers,

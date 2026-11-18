@@ -2,6 +2,7 @@ import Link from "next/link";
 import { learningContext, catalogState } from "@/lib/learning/server";
 import { ACCESS } from "@/lib/learning/domain.mjs";
 import { UniverseIcon } from "../universe-icons";
+import LabStarters from "./lab-starters";
 export const metadata = {
   title: "20분 학습 | ASTERA",
   description: "PDF와 웹앱으로 질문하고 탐구하는 ASTERA의 20분 학습.",
@@ -101,7 +102,7 @@ export default async function LearningPage({ searchParams }) {
               ? "새로운 학습을 준비하고 있어요"
               : items.length
                 ? "검색 결과가 없어요"
-                : "첫 번째 학습을 준비하고 있어요"}
+                : "20분 학습은 검토하고 있어요"}
           </h2>
           <p>
             {items.length
@@ -116,6 +117,7 @@ export default async function LearningPage({ searchParams }) {
           </Link>
         </section>
       )}
+      {!items.length && <LabStarters />}
       <aside className="learning-catalog-note">
         <b>무료로 먼저 경험해보세요.</b>
         <p>

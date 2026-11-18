@@ -1,33 +1,37 @@
 import Link from "next/link";
 import NavBar from "../nav-bar";
 import { MEMBERSHIP_PLAN } from "@/lib/membership";
+import { membershipSalesReady } from "@/lib/membership-status";
 
 export const metadata = {
   title: "요금제 — ASTERA",
 };
+export const dynamic = "force-dynamic";
 
 export default function PricingPage() {
+  const ready = membershipSalesReady();
   return (
     <>
       <NavBar />
       <div className="wrap page-hero">
         <h1>요금제</h1>
-        <p>지금은 워크북 멤버십 한 가지로 시작합니다. 콘텐츠가 늘어나는 대로 요금제도 함께 넓혀갈 예정이에요.</p>
+        <p>무료 LAB으로 먼저 탐구하고, 워크북 미리보기에서 활동을 살펴보세요.</p>
       </div>
       <div className="wrap" style={{ paddingBottom: 100 }}>
         <div className="paywall">
-          <span className="eyebrow">워크북 멤버십</span>
+          <span className="eyebrow">{ready ? "워크북 멤버십" : "워크북 멤버십 · 출시 준비 중"}</span>
           <h2>{MEMBERSHIP_PLAN.name}</h2>
-          <p>읽기·생각·토론·쓰기·설계 워크시트 전체와 앞으로 추가되는 모든 질문 워크북을 자유롭게 이용할 수 있어요.</p>
+          <p>주제별 읽기와 탐구, 글쓰기 활동을 워크북으로 이어갑니다. 현재 제공되는 활동을 미리 확인해 보세요.</p>
           <div className="price-tag">
             {MEMBERSHIP_PLAN.amount.toLocaleString("ko-KR")}원<span> / {MEMBERSHIP_PLAN.durationDays}일</span>
           </div>
-          <Link className="primary" href="/signup">
-            무료로 둘러보기
+          <Link className="primary" href={ready ? "/checkout" : "/workbook"}>
+            {ready ? "멤버십 시작하기" : "워크북 무료 미리보기"}
           </Link>
-          <p style={{ marginTop: 18, fontSize: 12.5, color: "#aab0d6" }}>
-            결제 연동은 다음 단계에서 진행돼요. 지금은 회원가입 후 워크북 미리보기와 무료 콘텐츠를 먼저 이용해보세요.
+          <p className="membership-availability">
+            {ready ? "1회 결제로 30일 동안 이용해요. 자동으로 갱신되지 않아요." : "19,900원은 30일 이용 예정 가격이에요. 결제와 제공 자료를 준비하고 있어요."}
           </p>
+          <Link className="membership-free-link" href="/lab">무료 LAB 시작하기 →</Link>
         </div>
       </div>
     </>

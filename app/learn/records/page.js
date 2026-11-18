@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { learningContext, dbCheck } from "@/lib/learning/server";
 import { STAGES } from "@/lib/learning/domain.mjs";
+import LocalLabRecords from "../../account/local-lab-records";
 export const metadata = { title: "나의 학습 기록 | ASTERA" };
 export default async function RecordsPage() {
   let ctx;
@@ -53,9 +54,10 @@ export default async function RecordsPage() {
         <div>
           <p className="learning-kicker">MY EXPLORATION</p>
           <h1>나의 학습 기록</h1>
-          <p>질문에서 시작한 생각이 이렇게 쌓였어요.</p>
+          <p>계정에 저장한 20분 학습 기록과 이 기기에 남긴 LAB 탐구를 확인해요.</p>
         </div>
       </header>
+      <LocalLabRecords />
       {!progress.data.length ? (
         <section className="learning-panel learning-empty">
           <h2>아직 학습 기록이 없어요</h2>

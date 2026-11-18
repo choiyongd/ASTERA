@@ -64,7 +64,7 @@ export default function AboutPage() {
               <article><span className="about-small-label">VISION · 우리가 바라보는 미래</span><h3>세상을 이해하고,<br />더 나은 내일을 만드는 사람.</h3><p>자신의 판단에 근거를 붙이고 다른 관점을 살피는 경험을 쌓도록 합니다. 일상과 사회의 문제를 함께 이해하며, 배운 것으로 새로운 해결안과 표현을 만드는 성장을 지향합니다.</p></article>
               <article><span className="about-small-label">PROMISE · 학습자와의 약속</span><h3>학생이 스스로 생각하고<br />설명할 수 있는 길을 설계합니다.</h3><p>개념 자료, 비교할 대상, 탐구 팁과 후속 질문을 제공합니다. 무엇을 선택했고 왜 그렇게 판단했는지 남길 수 있도록 하고, 아직 모르는 것과 확인한 것을 구분하는 태도를 존중합니다.</p></article>
             </div>
-            <div className="about-age-note"><b>성장을 함께하는 범위</b><p>ASTERA의 장기적인 대상은 7–17세 어린이와 청소년입니다. 현재 Beta의 001 LAB은 초등 4–6학년을 중심으로 설계하며, 읽기 수준과 탐구 경험에 맞게 질문과 활동의 깊이를 조절해갈 계획입니다.</p></div>
+            <div className="about-age-note"><b>함께 탐구하는 학생들</b><p>ASTERA는 초등 3–6학년과 중학생을 위한 학습 공간입니다. 초등학생은 자료에서 단서를 찾는 기본 질문으로 시작하고, 중학생은 비교와 설명을 더하는 선택 질문으로 이어갑니다. LAB별 권장 수준은 각 주제에서 확인할 수 있어요.</p></div>
           </div>
         </section>
 
