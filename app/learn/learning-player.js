@@ -8,6 +8,7 @@ import {
   normalizeProgress,
 } from "@/lib/learning/domain.mjs";
 import { learningRequest } from "@/lib/learning/client";
+import { splitPrompt, splitReading, splitAnswer, joinAnswer } from "@/lib/learning/presentation.mjs";
 function freshProgress() {
   return {
     answers: Object.fromEntries(STAGES.map((s) => [s.id, ""])),
@@ -31,6 +32,7 @@ export default function LearningPlayer({
   const [loaded, setLoaded] = useState(authenticated || preview),
     [saveStatus, setSaveStatus] = useState(""),
     [error, setError] = useState(""),
+    [inputError, setInputError] = useState(""),
     [saving, setSaving] = useState(false);
   const revision = useRef(initialProgress?.revision || 0),
     queued = useRef(null),
@@ -42,6 +44,7 @@ export default function LearningPlayer({
       ),
     );
   const heading = useRef(null),
+    answerRef = useRef(null),
     errorRef = useRef(null),
     lastStep = useRef(0),
     latest = useRef(record),
@@ -147,10 +150,16 @@ export default function LearningPlayer({
       completed: false,
     }));
     setError("");
+    setInputError("");
     setSaveStatus("저장 대기 중…");
   }
   async function next(event) {
     event.preventDefault();
+    if (splitAnswer(record.answers[STAGES[record.step].id]).main.trim().length < 6) {
+      setInputError("기본 질문에 대한 생각을 6자 이상 써 보세요.");
+      answerRef.current?.focus();
+      return;
+    }
     clearTimeout(autosaveTimer.current);
     setError("");
     try {
@@ -190,9 +199,12 @@ export default function LearningPlayer({
   }
   const current = content.stages[record.step],
     first = STAGES.findIndex(
-      (s) => (record.answers[s.id] || "").trim().length < 6,
+      (s) => splitAnswer(record.answers[s.id]).main.trim().length < 6,
     ),
-    available = first < 0 ? 4 : first;
+    available = first < 0 ? 4 : first,
+    prompt = splitPrompt(current.prompt),
+    reading = splitReading(current.body),
+    answer = splitAnswer(record.answers[current.id]);
   return (
     <main className="learning-shell learning-player">
       {preview && (
@@ -371,8 +383,14 @@ export default function LearningPlayer({
               ) : (
                 <form onSubmit={next}>
                   <div className="learning-prose learning-reading">
-                    {current.body || "이 단계의 학습 안내를 작성해주세요."}
+                    {reading.main || "이 단계의 학습 안내를 작성해주세요."}
                   </div>
+                  {reading.extra && (
+                    <details className="learning-extra-reading">
+                      <summary>더 읽기 · 배경이 궁금할 때</summary>
+                      <div className="learning-prose">{reading.extra}</div>
+                    </details>
+                  )}
                   <div className="learning-materials">
                     {materials
                       .filter((m) => m.stage === record.step)
@@ -383,44 +401,54 @@ export default function LearningPlayer({
                         />
                       ))}
                   </div>
-                  {(record.step === 0 || record.step === 4) && (
-                    <CompetencyAssessment
-                      phase={record.step === 0 ? "pre" : "post"}
-                      values={
-                        record.assessment[record.step === 0 ? "pre" : "post"]
-                      }
-                      onChange={(index, value) => {
-                        const phase = record.step === 0 ? "pre" : "post";
-                        setRecord((r) => ({
-                          ...r,
-                          completed: false,
-                          assessment: {
-                            ...r.assessment,
-                            [phase]: r.assessment[phase].map((v, i) =>
-                              i === index ? value : v,
-                            ),
-                          },
-                        }));
-                        setError("");
-                      }}
-                    />
-                  )}
                   <label
                     className="learning-answer"
                     htmlFor={`answer-${current.id}`}
                   >
-                    <b>{current.prompt}</b>
+                    <b className="learning-prose">{prompt.main}</b>
                     <span>
                       내 생각과 근거를 한 문장 이상 남겨주세요. (6자 이상)
                     </span>
                     <textarea
                       id={`answer-${current.id}`}
+                      ref={answerRef}
+                      aria-invalid={Boolean(inputError)}
+                      aria-describedby={inputError ? "learning-answer-error" : undefined}
                       rows={6}
-                      maxLength={4000}
-                      value={record.answers[current.id]}
-                      onChange={(e) => updateAnswer(e.target.value)}
+                      maxLength={prompt.extra ? 2500 : 4000}
+                      value={answer.main}
+                      onChange={(e) => updateAnswer(joinAnswer(e.target.value, answer.extra))}
                     />
                   </label>
+                  {inputError && <p id="learning-answer-error" className="learning-input-error" role="alert">{inputError}</p>}
+                  {prompt.extra && (
+                    <details className="learning-extra-question" key={current.id + "extra"}>
+                      <summary>중학생 더 생각하기 · 선택</summary>
+                      <label className="learning-answer" htmlFor={`extra-${current.id}`}>
+                        <b className="learning-prose">{prompt.extra}</b>
+                        <span>기본 질문에 답한 뒤, 더 생각하고 싶을 때 써 보세요.</span>
+                        <textarea id={`extra-${current.id}`} rows={4} maxLength={1400}
+                          value={answer.extra}
+                          onChange={(e) => updateAnswer(joinAnswer(answer.main, e.target.value))} />
+                      </label>
+                    </details>
+                  )}
+                  {(record.step === 0 || record.step === 4) && (
+                    <details className="learning-optional-assessment" key={record.step}>
+                      <summary>나의 자신감 기록하기 · 선택</summary>
+                      <p className="learning-hint">지금은 답변만 쓰고 다음 단계로 가도 괜찮아요.</p>
+                      <CompetencyAssessment
+                        phase={record.step === 0 ? "pre" : "post"}
+                        values={record.assessment[record.step === 0 ? "pre" : "post"]}
+                        onChange={(index, value) => {
+                          const phase = record.step === 0 ? "pre" : "post";
+                          setRecord((r) => ({ ...r, assessment: {
+                            ...r.assessment, [phase]: r.assessment[phase].map((v, i) => i === index ? value : v),
+                          } }));
+                        }}
+                      />
+                    </details>
+                  )}
                   {record.step === 4 && (
                     <details className="learning-initial-thought">
                       <summary>처음에 남긴 생각 다시 보기</summary>

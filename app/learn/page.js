@@ -2,6 +2,7 @@ import Link from "next/link";
 import { learningContext, catalogState } from "@/lib/learning/server";
 import { ACCESS } from "@/lib/learning/domain.mjs";
 import { UniverseIcon } from "../universe-icons";
+import LabStarters from "./lab-starters";
 export const metadata = {
   title: "20분 학습 | ASTERA",
   description: "PDF와 웹앱으로 질문하고 탐구하는 ASTERA의 20분 학습.",
@@ -28,8 +29,8 @@ export default async function LearningPage({ searchParams }) {
       <header className="learning-page-head">
         <div>
           <p className="learning-kicker">ASTERA / LEARNING</p>
-          <h1>하나의 질문, 20분의 탐구</h1>
-          <p>읽고, 직접 해보고, 나의 생각을 남겨보세요.</p>
+          <h1>{items.length ? "하나의 질문, 20분의 탐구" : "나의 질문으로 시작하는 탐구"}</h1>
+          <p>{items.length ? "읽고, 직접 해보고, 나의 생각을 남겨보세요." : "무료 LAB에서 직접 해 보고, 내 생각을 남겨 보세요."}</p>
         </div>
         <div className="learning-actions">
           <Link className="learning-button secondary" href="/learn/records">
@@ -42,7 +43,7 @@ export default async function LearningPage({ searchParams }) {
           )}
         </div>
       </header>
-      <form className="learning-search" action="/learn">
+      {items.length > 0 && <form className="learning-search" action="/learn">
         <label>
           <span className="learning-sr">주제 검색</span>
           <input
@@ -68,10 +69,10 @@ export default async function LearningPage({ searchParams }) {
           </select>
         </label>
         <button className="learning-button">찾기</button>
-      </form>
-      <p className="learning-count">
+      </form>}
+      {items.length > 0 && <p className="learning-count">
         {filtered.length}개 학습 · 주제당 약 20분
-      </p>
+      </p>}
       {filtered.length ? (
         <div className="learning-catalog">
           {filtered.map((item) => (
@@ -94,14 +95,14 @@ export default async function LearningPage({ searchParams }) {
             </Link>
           ))}
         </div>
-      ) : (
+      ) : items.length ? (
         <section className="learning-panel learning-empty">
           <h2>
             {setup
               ? "새로운 학습을 준비하고 있어요"
               : items.length
                 ? "검색 결과가 없어요"
-                : "첫 번째 학습을 준비하고 있어요"}
+                : "20분 학습은 검토하고 있어요"}
           </h2>
           <p>
             {items.length
@@ -115,7 +116,8 @@ export default async function LearningPage({ searchParams }) {
             {items.length ? "모든 학습 보기" : "무료 LAB 둘러보기"}
           </Link>
         </section>
-      )}
+      ) : <p className="learning-catalog-note">자료와 질문으로 이어가는 20분 학습 과정은 검토 중이에요. 먼저 아래 무료 LAB을 이용해 보세요.</p>}
+      {!items.length && <LabStarters />}
       <aside className="learning-catalog-note">
         <b>무료로 먼저 경험해보세요.</b>
         <p>

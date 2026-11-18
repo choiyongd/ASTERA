@@ -1,7 +1,8 @@
 import { nanoid } from "nanoid";
 import { learningContext } from "@/lib/learning/server";
-import { firebaseAdminConfigured, firebaseAdminDb } from "@/lib/firebase/admin";
+import { firebaseAdminDb } from "@/lib/firebase/admin";
 import { MEMBERSHIP_PLAN } from "@/lib/membership";
+import { membershipSalesReady } from "@/lib/membership-status";
 export async function POST(request) {
   try {
     const origin = request.headers.get("origin");
@@ -13,11 +14,7 @@ export async function POST(request) {
     const { user } = await learningContext();
     if (!user)
       return Response.json({ error: "로그인이 필요합니다." }, { status: 401 });
-    if (
-      !firebaseAdminConfigured() ||
-      !process.env.TOSS_SECRET_KEY ||
-      process.env.TOSS_SECRET_KEY.startsWith("YOUR_")
-    )
+    if (!membershipSalesReady())
       return Response.json(
         { error: "멤버십 결제 연결을 준비하고 있어요." },
         { status: 503 },

@@ -17,6 +17,8 @@ export async function PATCH(request, { params }) {
     const body = await readJson(request);
     if (!Number.isInteger(body.revision) || body.revision < 1)
       throw new LearningError("자료 버전을 확인해주세요.");
+    if (body.reviewStatus !== undefined && !["pending", "needs_changes", "reviewed"].includes(body.reviewStatus))
+      throw new LearningError("검토 상태를 확인해주세요.");
     if (body.action === "publish") {
       const row = dbCheck(
         await db.from("learning_lessons").select("*").eq("id", id).single(),
@@ -48,7 +50,9 @@ export async function PATCH(request, { params }) {
           ...(body.teacherNotes !== undefined
             ? { p_teacher_notes: validateTeacherNotes(body.teacherNotes) }
             : {}),
-          ...(typeof body.sourceReviewed === "boolean"
+          ...(body.reviewStatus !== undefined
+            ? { p_review_status: body.reviewStatus }
+            : typeof body.sourceReviewed === "boolean"
             ? { p_review_status: body.sourceReviewed ? "reviewed" : "pending" }
             : {}),
           p_revision: body.revision,

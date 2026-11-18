@@ -8,7 +8,7 @@ import SessionBridge from "./session-bridge";
 export const metadata = {
   title: "ASTERA — 궁금함이 배움이 되는 곳",
   description:
-    "7–17세를 위한 세상 이해 학습 플랫폼 ASTERA. 철학부터 AI, 경제, 예술, 공학, 오늘의 뉴스까지 질문하고 탐구합니다.",
+    "초등 3–6학년과 중학생을 위한 ASTERA. 과학·문학·철학·기술의 자료를 보고, 근거를 찾아 나의 생각을 남깁니다.",
 };
 
 export default function RootLayout({ children }) {
@@ -26,7 +26,7 @@ export default function RootLayout({ children }) {
           rel="stylesheet"
         />
       </head>
-      <body><SessionBridge /><BrandIntro><SiteMotion>{children}</SiteMotion></BrandIntro></body>
+      <body><SessionBridge /><BrandIntro><a className="skip-to-content" href="#site-main">본문으로 바로 가기</a><div id="site-main" tabIndex={-1}><SiteMotion>{children}</SiteMotion></div></BrandIntro></body>
     </html>
   );
 }

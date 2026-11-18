@@ -385,6 +385,15 @@ test("Firebase rules enforce draft isolation, memberships, immutable uploads and
     });
     assert.equal(saved.error, null, JSON.stringify(saved.error));
     assert.equal(saved.data.completed, true);
+    const withoutRatings = await memberStore.rpc("learning_save_progress", {
+      p_release: catalog.release_id, p_answers: answer, p_step: 4,
+      p_completed: true, p_revision: 1,
+      p_assessment: { pre: [0, 0, 0, 0], post: [0, 0, 0, 0] },
+    });
+    assert.equal(withoutRatings.error, null, JSON.stringify(withoutRatings.error));
+    await assertFails(updateDoc(doc(member.firestore(), "learning_progress", progressId), {
+      revision: 3, assessment: { pre: [9, 0, 0, 0], post: [0, 0, 0, 0] },
+    }));
     const stale = await memberStore.rpc("learning_save_progress", {
       p_release: catalog.release_id,
       p_answers: answer,

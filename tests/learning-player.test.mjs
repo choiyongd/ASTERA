@@ -114,17 +114,13 @@ async function mount({
     },
   };
 }
-test("actual learner controls require baseline assessment, finish all five stages, and restore browser records", async () => {
+test("learners finish all five stages without optional assessments and restore browser records", async () => {
   const ui = await mount();
   try {
     await ui.answer();
     await ui.next();
-    assert.match(ui.alerts(), /자기평가/);
-    await ui.assess("pre");
-    await ui.next();
     for (let i = 1; i <= 4; i++) {
       await ui.answer();
-      if (i === 4) await ui.assess("post");
       await ui.next();
     }
     assert.ok(
@@ -134,7 +130,7 @@ test("actual learner controls require baseline assessment, finish all five stage
     );
     const saved = JSON.parse(ui.storage.get("astera:learn:release-test:v2"));
     assert.equal(saved.completed, true);
-    assert.deepEqual(saved.assessment.post, [3, 3, 3, 3]);
+    assert.deepEqual(saved.assessment.post, [0, 0, 0, 0]);
     await ui.close();
     const restored = await mount({ storage: ui.storage });
     try {

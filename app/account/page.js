@@ -6,6 +6,7 @@ import { learningContext, dbCheck, catalogState } from "@/lib/learning/server";
 import { learningAnalytics } from "@/lib/learning/analytics.mjs";
 import EmailVerification from "./components/email-verification";
 import LearningCharts from "./components/learning-charts";
+import LocalLabRecords from "./local-lab-records";
 import "../learn/learning.css";
 export const dynamic = "force-dynamic";
 export const metadata = { title: "마이페이지 | ASTERA" };
@@ -25,6 +26,7 @@ export default async function AccountPage() {
     profile = ctx.profile;
   const isMember =
     profile?.is_member && Number(profile.membership_expires_at) > Date.now();
+  const continuing = records.filter((r) => !r.completed && catalog.some((c) => c.release_id === r.release_id));
   return (
     <>
       <NavBar />
@@ -48,6 +50,16 @@ export default async function AccountPage() {
           </div>
         </header>
         {!ctx.user.emailVerified && <EmailVerification />}
+        <section className="learning-panel learning-continue">
+          <h2>{continuing.length ? "이어서 학습하기" : "오늘의 첫 질문을 골라요"}</h2>
+          {continuing.length ? continuing.slice(0, 3).map((record) => {
+            const course = catalog.find((c) => c.release_id === record.release_id);
+            return <Link key={record.release_id} className="learning-continue-link" href={`/learn/${course.slug}`}>
+              <span>{course.title}<small>{record.step + 1}/5단계부터 이어가요</small></span><b>이어서 하기 →</b>
+            </Link>;
+          }) : <><p>관심 있는 주제 하나로 시작해 보세요. 무료 LAB은 로그인 없이 이용할 수 있어요.</p><Link className="learning-button" href={catalog.length ? "/learn" : "/lab/science-001"}>{catalog.length ? "학습 주제 찾기" : "무료 생명 탐사 시작"} →</Link></>}
+        </section>
+        <LocalLabRecords />
         <div className="learning-stats">
           <article>
             <span>완료한 주제</span>
@@ -131,7 +143,7 @@ export default async function AccountPage() {
               <h3>아직 남긴 학습 기록이 없어요</h3>
               <p>궁금한 주제를 고르고 첫 번째 생각을 남겨보세요.</p>
               <Link className="learning-button" href="/learn?access=public">
-                무료 학습 찾기
+                학습과 무료 체험 찾기
               </Link>
             </div>
           )}

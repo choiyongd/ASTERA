@@ -1127,6 +1127,41 @@
   border-radius: 9px;
   margin: 28px 0;
 }
+
+.learning-starters { margin: 30px 0; }
+.learning-starters .learning-toolbar { align-items: flex-start; }
+.learning-starters p { color: #52677e; line-height: 1.75; }
+.learning-starter-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.learning-starter-card { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; padding: 24px; border: 1px solid #d4dce5; background: white; border-radius: 14px; color: #102a4a; text-decoration: none; }
+.learning-starter-card:hover { border-color: #2368bf; background: #f6faff; }
+.learning-starter-card > span { font-size: 13px; color: #52677e; }
+.learning-starter-card h3 { font-size: 19px; line-height: 1.6; margin: 0; }
+.learning-starter-card p { margin: 0; }
+.learning-starter-card > b { margin-top: auto; padding-top: 10px; }
+.learning-continue { border-left: 4px solid #2b68c4; margin-bottom: 20px; }
+.learning-continue-link { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 18px 0; color: #102a4a; text-decoration: none; }
+.learning-continue-link small { display: block; padding-top: 8px; color: #52677e; }
+.learning-continue-link b { white-space: nowrap; }
+.learning-optional-assessment, .learning-extra-question, .learning-extra-reading { margin: 22px 0; padding: 18px; border: 1px solid #d4dce5; border-radius: 10px; background: #f8fafc; }
+.learning-extra-question summary, .learning-extra-reading summary, .learning-optional-assessment summary { min-height: 44px; display: list-item; align-content: center; cursor: pointer; font-weight: 700; }
+.learning-extra-question .learning-answer { margin-bottom: 0; }
+.learning-input-error { color: #a51d29; margin-top: -12px; }
+.learning-answer > b.learning-prose { white-space: pre-wrap; }
+.learning-answer textarea[aria-invalid="true"] { border: 2px solid #a51d29; }
+.learning-optional-assessment .learning-assessment { border: 0; padding: 0; margin-bottom: 0; }
+.learning-list-filters { grid-template-columns: 2fr repeat(3, minmax(140px, 1fr)); }
+@media(max-width: 900px) {
+  .learning-starter-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .learning-list-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media(max-width: 600px) {
+  .learning-starter-grid, .learning-list-filters { grid-template-columns: minmax(0, 1fr); }
+  .learning-starter-card { padding: 20px; }
+  .learning-continue-link { align-items: flex-start; flex-direction: column; }
+  .learning-prose, .learning-answer > b { font-size: 16px; line-height: 1.9; }
+  .learning-extra-question, .learning-extra-reading, .learning-optional-assessment { padding: 14px; }
+  .learning-workspace { padding: 20px 16px; }
+}
 .learning-assessment h3 {
   font-size: 17px;
   margin: 0 0 10px;

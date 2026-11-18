@@ -1,17 +1,37 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ACCESS } from "@/lib/learning/domain.mjs";
 export default function LessonList({ items }) {
   const [query, setQuery] = useState(""),
     [category, setCategory] = useState(""),
     [status, setStatus] = useState(""),
+    [review, setReview] = useState(""),
     [page, setPage] = useState(0);
+  const [restored, setRestored] = useState(false);
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(sessionStorage.getItem("astera:admin:lesson-filters") || "null");
+      if (saved) {
+        setQuery(typeof saved.query === "string" ? saved.query : "");
+        setCategory(typeof saved.category === "string" ? saved.category : "");
+        setStatus(["", "draft", "published"].includes(saved.status) ? saved.status : "");
+        setReview(["", "pending", "needs_changes", "reviewed", "incomplete", "missing"].includes(saved.review) ? saved.review : "");
+        setPage(Number.isInteger(saved.page) && saved.page >= 0 ? saved.page : 0);
+      }
+    } catch {}
+    setRestored(true);
+  }, []);
+  useEffect(() => {
+    if (!restored) return;
+    try { sessionStorage.setItem("astera:admin:lesson-filters", JSON.stringify({ query, category, status, review, page })); } catch {}
+  }, [query, category, status, review, page, restored]);
   const categories = [...new Set(items.map((i) => i.category).filter(Boolean))];
   const filtered = items.filter(
     (i) =>
       (!category || i.category === category) &&
       (!status || (status === "published" ? i.version : !i.version)) &&
+      (!review || (review === "incomplete" ? i.incomplete : review === "missing" ? !i.materialCount : i.reviewStatus === review)) &&
       `${i.title} ${i.stationId || ""}`
         .toLocaleLowerCase()
         .includes(query.trim().toLocaleLowerCase()),
@@ -34,6 +54,16 @@ export default function LessonList({ items }) {
             onChange={(e) => filter(setQuery, e.target.value)}
             placeholder="예: 돈키호테, TEC-30"
           />
+        </label>
+        <label>검토 상태
+          <select value={review} onChange={(e) => filter(setReview, e.target.value)}>
+            <option value="">모든 검토 상태</option>
+            <option value="pending">검토 대기</option>
+            <option value="needs_changes">수정 요청</option>
+            <option value="reviewed">검토 완료</option>
+            <option value="incomplete">학습 문안 미완성</option>
+            <option value="missing">연결 자료 없음</option>
+          </select>
         </label>
         <label>
           원문 분야
@@ -91,7 +121,7 @@ export default function LessonList({ items }) {
                     {i.version ? `발행 v${i.version}` : "비공개 초안"}
                   </span>
                   {i.source && (
-                    <small>{i.reviewed ? "검토 완료" : "검토 대기"}</small>
+                    <small>{i.reviewStatus === "needs_changes" ? "수정 요청" : i.reviewed ? "검토 완료" : "검토 대기"}</small>
                   )}
                 </td>
                 <td>

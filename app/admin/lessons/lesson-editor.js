@@ -35,6 +35,7 @@ export default function LessonEditor({
   const [sourceReviewed, setSourceReviewed] = useState(
     initialLesson?.review_status === "reviewed",
   );
+  const [reviewStatus, setReviewStatus] = useState(initialLesson?.review_status || "pending");
   const [assets, setAssets] = useState(initialAssets),
     [dirty, setDirty] = useState(false),
     [busy, setBusy] = useState(false);
@@ -67,6 +68,10 @@ export default function LessonEditor({
   }, [error]);
   function update(key, value) {
     setDraft((d) => ({ ...d, [key]: value }));
+    if (sourceReviewed) {
+      setSourceReviewed(false);
+      setReviewStatus("pending");
+    }
     setDirty(true);
     setError("");
     setMessage("");
@@ -95,7 +100,7 @@ export default function LessonEditor({
       lesson ? `/api/admin/lessons/${lesson.id}` : "/api/admin/lessons",
       {
         draft: valid,
-        ...(lesson?.source ? { teacherNotes, sourceReviewed } : {}),
+        ...(lesson?.source ? { teacherNotes, sourceReviewed, reviewStatus } : {}),
         revision: lesson?.revision,
         labId: lesson ? undefined : linkedLabId,
       },
@@ -339,10 +344,22 @@ export default function LessonEditor({
                     checked={sourceReviewed}
                     onChange={(e) => {
                       setSourceReviewed(e.target.checked);
+                      setReviewStatus(e.target.checked ? "reviewed" : "pending");
                       setDirty(true);
                     }}
                   />{" "}
                   학생용 내용·교사용 검수 사항과 출처·이용 조건을 확인했어요.
+                </label>
+                <label>검토 상태
+                  <select value={reviewStatus} onChange={(e) => {
+                    setReviewStatus(e.target.value);
+                    setSourceReviewed(e.target.value === "reviewed");
+                    setDirty(true);
+                  }}>
+                    <option value="pending">검토 대기</option>
+                    <option value="needs_changes">수정 요청 · 교사용 검수 사항에 이유 기록</option>
+                    <option value="reviewed">검토 완료 · 출처와 이용 조건 확인</option>
+                  </select>
                 </label>
               </section>
             )}

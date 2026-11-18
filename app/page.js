@@ -183,7 +183,7 @@ export default function HomePage() {
           <div className="hero-banner-scrim" aria-hidden="true" />
           <div className="wrap hero-banner-content">
             <span className="eyebrow">
-              <span className="dot" /> 7–17세를 위한 세상 탐구 플랫폼 · Beta
+              <span className="dot" /> 초등 3–6학년과 중학생을 위한 탐구 · Beta
             </span>
             <h1>
               질문에서
@@ -191,9 +191,9 @@ export default function HomePage() {
               세상이 시작됩니다.
             </h1>
             <p>
-              <b>호기심이 지식이 되고, 지식이 더 나은 미래를 만듭니다.</b>
+              <b>자료를 보고, 근거를 찾아, 내 생각을 남겨요.</b>
               <br />
-              철학부터 AI, 경제, 예술, 공학, 오늘의 뉴스까지. ASTERA와 함께 세상을 탐구하는 여정을 시작하세요.
+              과학과 문학, 철학과 기술까지. 5–10분 무료 LAB에서 질문 하나로 시작해 보세요.
             </p>
             <form
               className="hero-search"
@@ -217,7 +217,7 @@ export default function HomePage() {
             </form>
             <div className="hero-actions">
               <Link className="primary" href="/lab/science-001">
-                무료 생명 탐사 LAB →
+                무료 탐구 시작하기 →
               </Link>
               <button className="secondary" onClick={goToLibrary}>질문 둘러보기</button>
             </div>
@@ -245,7 +245,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="wrap learning-home-entry"><div><h2>하나의 질문, 20분의 탐구</h2><p>PDF와 웹앱으로 배우고, 나의 생각을 학습 기록으로 남겨보세요.</p></div><Link href="/learn">20분 학습 둘러보기 →</Link></section>
+        <section className="wrap learning-home-entry"><div><h2>내게 맞는 질문에서 시작해요</h2><p>무료 LAB은 5–10분 체험, 20분 학습은 자료와 질문을 따라 답을 남기는 과정이에요.</p></div><Link href="/learn">학습과 무료 체험 보기 →</Link></section>
       <section className="wrap home-lab-entry" aria-labelledby="home-lab-title">
           <div className="home-lab-code"><span>ASTERA LAB</span><b>SCIENCE 001</b></div>
           <div><h2 id="home-lab-title">오늘은, 생명 탐사자.</h2><p>5–10분 동안 행성의 단서를 조사하고, 나의 생각을 근거로 설명해보세요.</p></div>
@@ -549,21 +549,21 @@ export default function HomePage() {
               <div className="iconbox i1"><IconPlay /></div>
               <h3>ASTERA Shorts</h3>
               <p>30~60초 애니메이션과 2~4분 메인 영상. 질문과 핵심 개념을 여는 콘텐츠.</p>
-              <div className="price">무료</div>
+              <div className="price muted">영상 준비 중 · <Link href="/lab">무료 LAB 보기 →</Link></div>
             </div>
             <div className="product">
               <div className="iconbox i2"><IconPencil /></div>
               <h3>Workbook + Worksheet</h3>
               <p>읽기·생각·토론·쓰기·설계를 한 번에. 짧은 워크시트도 함께 제공합니다.</p>
               <div className="price">
-                <Link href="/pricing">월 {MEMBERSHIP_PLAN.amount.toLocaleString("ko-KR")}원 · 자세히 →</Link>
+                <Link href="/pricing">30일 {MEMBERSHIP_PLAN.amount.toLocaleString("ko-KR")}원 예정 · 출시 준비 →</Link>
               </div>
             </div>
             <div className="product">
               <div className="iconbox i3"><IconChat /></div>
               <h3>Guide</h3>
               <p>부모·교사가 바로 활용할 수 있는 발문, 운영 흐름, 평가·확장 아이디어.</p>
-              <div className="price">멤버십 포함</div>
+              <div className="price muted">가이드 준비 중</div>
             </div>
             <div className="product">
               <div className="iconbox i4"><IconToolbox /></div>
