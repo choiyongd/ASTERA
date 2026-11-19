@@ -18,6 +18,7 @@ export default function ReadingDeck({ deck, universe }) {
   const heading = useRef(null);
   const transitioning = useRef(false);
   const card = deck.cards[index];
+  const markers = card.body.match(/[①②③④]/) ? "①②③④" : card.body.match(/[㉠㉡㉢㉣]/) ? "㉠㉡㉢㉣" : card.kind === "sequence" ? "1234" : "ABCD";
 
   useEffect(() => {
     const engine = window.speechSynthesis;
@@ -86,7 +87,6 @@ export default function ReadingDeck({ deck, universe }) {
         {card.panels.length > 0 && (
           <ol className="reading-diagram" aria-label={labels[card.kind]}>
             {card.panels.map((panel, i) => {
-              const markers = card.body.match(/[①②③④]/) ? "①②③④" : card.body.match(/[㉠㉡㉢㉣]/) ? "㉠㉡㉢㉣" : card.kind === "sequence" ? "1234" : "ABCD";
               const marker = markers[i];
               return <li key={i} className={i < revealed ? "" : "reading-diagram-hidden"}>
                 <span className="reading-diagram-symbol">{marker}</span>
@@ -117,11 +117,12 @@ export default function ReadingDeck({ deck, universe }) {
         <button type="button" className="learning-button" disabled={index === deck.cards.length - 1} onClick={() => move(index + 1)}>다음 카드 →</button>
       </nav>
       <aside className="reading-sources">
-        <p><strong>출처</strong> {deck.source} · ASTERA 재구성</p>
+        <p><strong>재구성에 사용한 자료</strong> {deck.source} · ASTERA 재구성</p>
         {deck.references.length > 0 && <details>
-          <summary>참고 문헌과 이용 조건</summary>
+          <summary>출처 링크와 참고 문헌</summary>
           <ul>{deck.references.map((source, i) => (
             <li key={i}>
+              {/^OpenStax,/.test(source.title) && <strong>PDF 부록 참고 · </strong>}
               {source.url ? <a href={source.url} target="_blank" rel="noreferrer">{source.title} ↗</a> : source.title}
               {source.license && <span> · {source.license}</span>}
             </li>
