@@ -6,6 +6,7 @@ import {
   releaseMaterials,
 } from "@/lib/learning/server";
 import { ACCESS, canAccess } from "@/lib/learning/domain.mjs";
+import { learnerContent } from "@/lib/learning/reading-deck.mjs";
 import LearningPlayer from "../learning-player";
 export default async function LearningDetailPage({ params }) {
   const { slug } = await params;
@@ -110,7 +111,7 @@ export default async function LearningDetailPage({ params }) {
   return (
     <LearningPlayer
       key={release.id}
-      content={release.content}
+      content={learnerContent(release.content)}
       releaseId={release.id}
       version={release.version}
       materials={materials}
