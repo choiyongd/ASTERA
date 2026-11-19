@@ -369,6 +369,45 @@ export default function LessonEditor({
                 단계별 읽기·활동 안내와 답할 질문을 적어주세요. 시간은 강제
                 제한이 아닌 권장 시간이에요.
               </p>
+              {draft.readingDeck && (
+                <details className="learning-stage-editor">
+                  <summary><b>그림과 함께 읽는 카드</b><span>{draft.readingDeck.cards.length}장</span></summary>
+                  <p className="learning-hint">카드와 출처를 수정한 뒤 저장본 미리보기에서 학생 화면으로 확인하세요.</p>
+                  <label>원자료 출처<input maxLength={260} value={draft.readingDeck.source} onChange={(e) => update("readingDeck", { ...draft.readingDeck, source: e.target.value })} /></label>
+                  {draft.readingDeck.cards.map((card, index) => {
+                    const updateCard = (changes) => update("readingDeck", {
+                      ...draft.readingDeck,
+                      cards: draft.readingDeck.cards.map((value, i) => i === index ? { ...value, ...changes } : value),
+                    });
+                    return (
+                      <fieldset className="learning-stage-editor" key={index}>
+                        <legend>카드 {index + 1}</legend>
+                        <label>제목<input maxLength={95} value={card.title} onChange={(e) => updateCard({ title: e.target.value })} /></label>
+                        <label>설명<textarea rows={3} maxLength={650} value={card.body} onChange={(e) => updateCard({ body: e.target.value })} /></label>
+                        {card.panels.map((panel, p) => (
+                          <label key={p}>{panel.label}
+                            <textarea rows={2} maxLength={420} value={panel.text} onChange={(e) => updateCard({
+                              panels: card.panels.map((value, i) => i === p ? { ...value, text: e.target.value } : value),
+                            })} />
+                          </label>
+                        ))}
+                      </fieldset>
+                    );
+                  })}
+                  {draft.readingDeck.references.map((ref, index) => {
+                    const changeReference = (field, value) => update("readingDeck", {
+                      ...draft.readingDeck,
+                      references: draft.readingDeck.references.map((item, i) => i === index ? { ...item, [field]: value } : item),
+                    });
+                    return <fieldset className="learning-stage-editor" key={index}>
+                      <legend>참고 문헌 {index + 1}</legend>
+                      <label>서지 정보<input maxLength={240} value={ref.title} onChange={(e) => changeReference("title", e.target.value)} /></label>
+                      <label>링크 주소<input type="url" maxLength={1000} value={ref.url} onChange={(e) => changeReference("url", e.target.value)} /></label>
+                      <label>이용 조건<input maxLength={100} value={ref.license} onChange={(e) => changeReference("license", e.target.value)} /></label>
+                    </fieldset>;
+                  })}
+                </details>
+              )}
               {draft.stages.map((s, i) => (
                 <details
                   className="learning-stage-editor"
