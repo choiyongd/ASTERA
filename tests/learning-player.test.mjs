@@ -6,19 +6,25 @@ import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import React, { act } from "react";
 import { create } from "react-test-renderer";
-import { newDraft, STAGES, COMPETENCIES } from "../lib/learning/domain.mjs";
+import { newDraft, validateDraft, STAGES, COMPETENCIES } from "../lib/learning/domain.mjs";
 const require = createRequire(import.meta.url),
   root = fileURLToPath(new URL("..", import.meta.url));
 const file = resolve(root, "app/learn/learning-player.js");
+const readingFile = resolve(root, "app/learn/reading-deck.js");
 const { transform } = require("next/dist/build/swc");
-const { code } = await transform(await readFile(file, "utf8"), {
-  filename: file,
+const compile = async (filename) => (await transform(await readFile(filename, "utf8"), {
+  filename,
   jsc: {
     parser: { syntax: "ecmascript", jsx: true },
     transform: { react: { runtime: "automatic" } },
   },
   module: { type: "commonjs" },
-});
+})).code;
+const [code, readingCode] = await Promise.all([compile(file), compile(readingFile)]);
+const readingModule = new Module(readingFile);
+readingModule.paths = Module._nodeModulePaths(dirname(readingFile));
+readingModule.require = (id) => id === "../universe-icons" ? { UniverseIcon: () => null } : require(id);
+readingModule._compile(readingCode, readingFile);
 const content = {
   ...newDraft(),
   title: "자료를 비교하는 질문",
@@ -32,6 +38,7 @@ async function mount({
   authenticated = false,
   storage = new Map(),
   request,
+  lesson = content,
 } = {}) {
   const original = Object.fromEntries(
     ["window", "localStorage", "IS_REACT_ACT_ENVIRONMENT"].map((k) => [
@@ -60,6 +67,8 @@ async function mount({
       ? ({ children, ...props }) => React.createElement("a", props, children)
       : id === "@/lib/learning/client"
         ? { learningRequest: request }
+        : id === "./reading-deck"
+          ? readingModule.exports
         : id.startsWith("@/")
           ? require(resolve(root, id.slice(2)))
           : require(id);
@@ -68,7 +77,7 @@ async function mount({
   await act(async () => {
     renderer = create(
       React.createElement(m.exports.default, {
-        content,
+        content: lesson,
         releaseId: "release-test",
         version: 1,
         materials: [],
@@ -114,6 +123,37 @@ async function mount({
     },
   };
 }
+test("reading cards and sources survive draft validation and are usable in the concept stage", async () => {
+  const deck = {
+    version: 1,
+    source: "원자료 12쪽",
+    references: [{ title: "참고 문헌", url: "https://example.com/lesson", license: "" }],
+    cards: [
+      { kind: "concept", title: "같은 지구, 다른 지도", body: "둥근 지구를 종이에 펴요.", panels: [] },
+      { kind: "compare", title: "자료를 열어 비교하기", body: "①과 ②를 살펴봐요.", panels: [
+        { label: "적도 가까이", text: "원이 작아요.", visual: "map-equator" },
+        { label: "극 가까이", text: "원이 커요.", visual: "map-pole" },
+      ] },
+    ],
+  };
+  assert.deepEqual(validateDraft({ ...content, readingDeck: deck }).readingDeck, deck);
+  const ui = await mount({ lesson: { ...content, readingDeck: deck } });
+  try {
+    await ui.answer();
+    await ui.next();
+    const root = ui.renderer.root;
+    const button = (label) => root.findAllByType("button").find((b) => text(b) === label);
+    assert.equal(root.findByProps({ href: "https://example.com/lesson" }).type, "a");
+    await act(async () => button("다음 카드 →").props.onClick());
+    assert.equal(root.findAllByProps({ "data-visual": "map-pole" }).length, 0);
+    await act(async () => button("② 자료 열기").props.onClick());
+    assert.equal(root.findByProps({ "data-visual": "map-pole" }).type, "div");
+    await act(async () => button("읽어주기").props.onClick());
+    assert.ok(root.findAllByProps({ role: "status" }).some((node) => text(node).includes("한국어 음성")));
+  } finally {
+    await ui.close();
+  }
+});
 test("learners finish all five stages without optional assessments and restore browser records", async () => {
   const ui = await mount();
   try {

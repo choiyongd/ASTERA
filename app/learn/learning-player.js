@@ -9,6 +9,7 @@ import {
 } from "@/lib/learning/domain.mjs";
 import { learningRequest } from "@/lib/learning/client";
 import { splitPrompt, splitReading, splitAnswer, joinAnswer } from "@/lib/learning/presentation.mjs";
+import ReadingDeck from "./reading-deck";
 function freshProgress() {
   return {
     answers: Object.fromEntries(STAGES.map((s) => [s.id, ""])),
@@ -382,9 +383,13 @@ export default function LearningPlayer({
                 </>
               ) : (
                 <form onSubmit={next}>
-                  <div className="learning-prose learning-reading">
-                    {reading.main || "이 단계의 학습 안내를 작성해주세요."}
-                  </div>
+                  {current.id === "concept" && content.readingDeck ? (
+                    <ReadingDeck deck={content.readingDeck} universe={content.universe} />
+                  ) : (
+                    <div className="learning-prose learning-reading">
+                      {reading.main || "이 단계의 학습 안내를 작성해주세요."}
+                    </div>
+                  )}
                   {reading.extra && (
                     <details className="learning-extra-reading">
                       <summary>더 읽기 · 배경이 궁금할 때</summary>
