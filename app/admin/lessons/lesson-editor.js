@@ -373,7 +373,7 @@ export default function LessonEditor({
                 <details className="learning-stage-editor">
                   <summary><b>그림과 함께 읽는 카드</b><span>{draft.readingDeck.cards.length}장</span></summary>
                   <p className="learning-hint">카드와 출처를 수정한 뒤 저장본 미리보기에서 학생 화면으로 확인하세요.</p>
-                  <label>원자료 출처<input maxLength={260} value={draft.readingDeck.source} onChange={(e) => update("readingDeck", { ...draft.readingDeck, source: e.target.value })} /></label>
+                  <label>원자료 위치 · 관리자용<input maxLength={260} value={draft.readingDeck.source ?? ""} onChange={(e) => update("readingDeck", { ...draft.readingDeck, source: e.target.value })} /></label>
                   {draft.readingDeck.cards.map((card, index) => {
                     const updateCard = (changes) => update("readingDeck", {
                       ...draft.readingDeck,
@@ -406,6 +406,25 @@ export default function LessonEditor({
                       <label>이용 조건<input maxLength={100} value={ref.license} onChange={(e) => changeReference("license", e.target.value)} /></label>
                     </fieldset>;
                   })}
+                  <h3>이 주제의 낱말 풀이</h3>
+                  <p className="learning-hint">카드에 나오는 낱말을 등록해요. 같은 낱말의 공통 풀이가 있으면 여기서 입력한 뜻을 사용해요.</p>
+                  {(draft.readingDeck.glossary ?? []).map((word, index) => {
+                    const updateWord = (changes) => update("readingDeck", {
+                      ...draft.readingDeck,
+                      glossary: draft.readingDeck.glossary.map((item, i) => i === index ? { ...item, ...changes } : item),
+                    });
+                    return <fieldset key={index} className="learning-stage-editor">
+                      <legend>낱말 {index + 1}</legend>
+                      <label>낱말<input maxLength={35} value={word.term} onChange={(e) => updateWord({ term: e.target.value })} /></label>
+                      <label>뜻<textarea rows={2} maxLength={180} value={word.meaning} onChange={(e) => updateWord({ meaning: e.target.value })} /></label>
+                      <button type="button" className="learning-button secondary" onClick={() => update("readingDeck", {
+                        ...draft.readingDeck, glossary: draft.readingDeck.glossary.filter((_, i) => i !== index),
+                      })}>이 낱말 빼기</button>
+                    </fieldset>;
+                  })}
+                  <button type="button" className="learning-button secondary" disabled={(draft.readingDeck.glossary?.length ?? 0) >= 15} onClick={() => update("readingDeck", {
+                    ...draft.readingDeck, glossary: [...(draft.readingDeck.glossary ?? []), { term: "", meaning: "" }],
+                  })}>낱말 추가</button>
                 </details>
               )}
               {draft.stages.map((s, i) => (
@@ -770,7 +789,11 @@ export default function LessonEditor({
               if (confirm === "restore") {
                 const release = releases.find((r) => r.id === restoreVersion);
                 if (release) {
-                  setDraft(release.content);
+                  const content = release.content;
+                  const source = content.readingDeck?.source ?? draft.readingDeck?.source ?? lesson.draft.readingDeck?.source;
+                  setDraft(content.readingDeck && source
+                    ? { ...content, readingDeck: { ...content.readingDeck, source } }
+                    : content);
                   setDirty(true);
                   setMessage(
                     "이전 발행본을 초안으로 가져왔어요. 확인 후 저장해주세요.",

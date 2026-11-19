@@ -7,6 +7,8 @@ import { fileURLToPath } from "node:url";
 import React, { act } from "react";
 import { create } from "react-test-renderer";
 import { newDraft, validateDraft, STAGES, COMPETENCIES } from "../lib/learning/domain.mjs";
+import { learnerContent } from "../lib/learning/reading-deck.mjs";
+import { createVocabulary } from "../lib/learning/vocabulary.mjs";
 const require = createRequire(import.meta.url),
   root = fileURLToPath(new URL("..", import.meta.url));
 const file = resolve(root, "app/learn/learning-player.js");
@@ -23,7 +25,8 @@ const compile = async (filename) => (await transform(await readFile(filename, "u
 const [code, readingCode] = await Promise.all([compile(file), compile(readingFile)]);
 const readingModule = new Module(readingFile);
 readingModule.paths = Module._nodeModulePaths(dirname(readingFile));
-readingModule.require = (id) => id === "../universe-icons" ? { UniverseIcon: () => null } : require(id);
+const requireFromReading = createRequire(readingFile);
+readingModule.require = (id) => id === "../universe-icons" ? { UniverseIcon: () => null } : requireFromReading(id);
 readingModule._compile(readingCode, readingFile);
 const content = {
   ...newDraft(),
@@ -41,7 +44,7 @@ async function mount({
   lesson = content,
 } = {}) {
   const original = Object.fromEntries(
-    ["window", "localStorage", "IS_REACT_ACT_ENVIRONMENT"].map((k) => [
+    ["window", "document", "localStorage", "IS_REACT_ACT_ENVIRONMENT"].map((k) => [
       k,
       globalThis[k],
     ]),
@@ -58,6 +61,13 @@ async function mount({
     location: { reload() {} },
     print() {},
     confirm: () => true,
+  };
+  const listeners = new Map();
+  globalThis.document = {
+    addEventListener: (event, listener) => listeners.set(event, listener),
+    removeEventListener: (event, listener) => {
+      if (listeners.get(event) === listener) listeners.delete(event);
+    },
   };
   globalThis.IS_REACT_ACT_ENVIRONMENT = true;
   const m = new Module(file);
@@ -90,6 +100,9 @@ async function mount({
   return {
     renderer,
     storage,
+    async escape() {
+      await act(async () => listeners.get("keydown")?.({ type: "keydown", key: "Escape" }));
+    },
     async answer() {
       await act(async () =>
         renderer.root
@@ -127,6 +140,7 @@ test("reading cards and sources survive draft validation and are usable in the c
   const deck = {
     version: 1,
     source: "원자료 12쪽",
+    glossary: [{ term: "지구", meaning: "우리가 살고 있는 행성이에요." }],
     references: [{ title: "참고 문헌", url: "https://example.com/lesson", license: "" }],
     cards: [
       { kind: "concept", title: "같은 지구, 다른 지도", body: "둥근 지구를 종이에 펴요.", panels: [] },
@@ -137,13 +151,31 @@ test("reading cards and sources survive draft validation and are usable in the c
     ],
   };
   assert.deepEqual(validateDraft({ ...content, readingDeck: deck }).readingDeck, deck);
+  const learner = learnerContent({ ...content, readingDeck: deck });
+  assert.equal(learner.readingDeck.source, undefined);
+  assert.deepEqual(learner.readingDeck.glossary, deck.glossary);
+  assert.equal(deck.source, "원자료 12쪽");
   const ui = await mount({ lesson: { ...content, readingDeck: deck } });
   try {
     await ui.answer();
     await ui.next();
     const root = ui.renderer.root;
     const button = (label) => root.findAllByType("button").find((b) => text(b) === label);
+    assert.doesNotMatch(JSON.stringify(ui.renderer.toJSON()), /원자료 12쪽/);
     assert.equal(root.findByProps({ href: "https://example.com/lesson" }).type, "a");
+    const tooltip = () => root.findByProps({ role: "tooltip" });
+    const word = button("지구");
+    assert.equal(tooltip().props.hidden, true);
+    await act(async () => word.parent.props.onPointerEnter({ pointerType: "mouse" }));
+    assert.equal(tooltip().props.hidden, false);
+    assert.match(text(tooltip()), /우리가 살고 있는 행성/);
+    await ui.escape();
+    assert.equal(tooltip().props.hidden, true);
+    await act(async () => word.props.onFocus({ currentTarget: { matches: () => true } }));
+    assert.equal(tooltip().props.hidden, false);
+    await act(async () => word.props.onClick());
+    await act(async () => word.parent.props.onPointerLeave());
+    assert.equal(tooltip().props.hidden, false);
     await act(async () => button("다음 카드 →").props.onClick());
     assert.equal(root.findAllByProps({ "data-visual": "map-pole" }).length, 0);
     await act(async () => button("② 자료 열기").props.onClick());
@@ -153,6 +185,13 @@ test("reading cards and sources survive draft validation and are usable in the c
   } finally {
     await ui.close();
   }
+});
+test("Korean vocabulary matches particles, preserves compound words and avoids repeat markers", () => {
+  const tokenize = createVocabulary();
+  const first = "해석은 해석표와 달라요. 적도에서 적도를 찾아요.";
+  const parts = tokenize(first);
+  assert.deepEqual(parts.filter((part) => typeof part !== "string").map((part) => part.term), ["해석", "적도"]);
+  assert.equal(parts.map((part) => typeof part === "string" ? part : part.term).join(""), first);
 });
 test("learners finish all five stages without optional assessments and restore browser records", async () => {
   const ui = await mount();

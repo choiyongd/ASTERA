@@ -5,6 +5,7 @@ import {
   releaseMaterials,
 } from "@/lib/learning/server";
 import { UUID } from "@/lib/learning/domain.mjs";
+import { learnerContent } from "@/lib/learning/reading-deck.mjs";
 import AdminGate from "../../../admin-gate";
 import LearningPlayer from "../../../../learn/learning-player";
 export default async function PreviewPage({ params }) {
@@ -27,7 +28,7 @@ export default async function PreviewPage({ params }) {
   if (!lesson) notFound();
   return (
     <LearningPlayer
-      content={lesson.draft}
+      content={learnerContent(lesson.draft)}
       materials={await releaseMaterials(ctx.db, lesson.draft)}
       releaseId={id}
       version={0}
