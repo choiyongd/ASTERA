@@ -2,6 +2,7 @@ import Link from "next/link";
 import { learningContext, dbCheck } from "@/lib/learning/server";
 import LessonList from "./lesson-list";
 import AdminGate from "./admin-gate";
+import { reviewCount } from "@/lib/learning/review.mjs";
 export const metadata = { title: "학습자료 관리 | ASTERA" };
 export default async function AdminPage() {
   let ctx;
@@ -16,7 +17,7 @@ export default async function AdminPage() {
     [lessons, catalog] = await Promise.all([
       ctx.db
         .from("learning_lessons")
-        .select("id,draft,source,review_status,revision,updated_at")
+        .select("id,draft,source,review_status,review_checks,revision,updated_at")
         .order("updated_at", { ascending: false }),
       ctx.db.from("learning_catalog").select("*"),
     ]);
@@ -75,6 +76,7 @@ export default async function AdminPage() {
                 source: Boolean(lesson.source),
                 reviewed: lesson.review_status === "reviewed",
                 reviewStatus: lesson.review_status || "pending",
+                checksDone: reviewCount(lesson.review_checks),
                 materialCount: lesson.draft.materials?.length || 0,
                 incomplete: !lesson.draft.goals?.length || lesson.draft.stages.some((s) => !s.body?.trim() || !s.prompt?.trim()),
                 version: pub?.version || null,

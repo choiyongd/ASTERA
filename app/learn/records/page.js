@@ -73,7 +73,7 @@ export default async function RecordsPage() {
               (c) => c.release_id === p.release_id,
             );
             return (
-              <article className="learning-panel" key={p.release_id}>
+              <article className="learning-panel" key={p.release_id} id={`record-${p.release_id}`}>
                 <div className="learning-toolbar">
                   <span
                     className={`learning-tag ${p.completed ? "published" : ""}`}

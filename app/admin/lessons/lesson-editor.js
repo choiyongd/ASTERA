@@ -12,6 +12,7 @@ import {
 } from "@/lib/learning/domain.mjs";
 import { ALL_LAB_TOPICS } from "@/lib/lab/catalog.mjs";
 import { learningRequest } from "@/lib/learning/client";
+import { REVIEW_CHECKS, requireReviewChecks, reviewChecks, reviewCount } from "@/lib/learning/review.mjs";
 import { uploadLearningFile } from "@/lib/firebase/client";
 
 export default function LessonEditor({
@@ -32,9 +33,7 @@ export default function LessonEditor({
   const [teacherNotes, setTeacherNotes] = useState(
     initialLesson?.teacher_notes || "",
   );
-  const [sourceReviewed, setSourceReviewed] = useState(
-    initialLesson?.review_status === "reviewed",
-  );
+  const [checks, setChecks] = useState(() => reviewChecks(initialLesson?.review_checks));
   const [reviewStatus, setReviewStatus] = useState(initialLesson?.review_status || "pending");
   const [assets, setAssets] = useState(initialAssets),
     [dirty, setDirty] = useState(false),
@@ -66,12 +65,25 @@ export default function LessonEditor({
   useEffect(() => {
     if (error) errorRef.current?.focus();
   }, [error]);
+  function invalidateChecks(ids) {
+    if (!lesson?.source || !ids.length) return;
+    setChecks((current) => ({ ...current, ...Object.fromEntries(ids.map((id) => [id, false])) }));
+    if (reviewStatus === "reviewed") setReviewStatus("pending");
+  }
   function update(key, value) {
-    setDraft((d) => ({ ...d, [key]: value }));
-    if (sourceReviewed) {
-      setSourceReviewed(false);
-      setReviewStatus("pending");
+    const affected = {
+      title: ["source", "prompt"], summary: ["source", "prompt"],
+      goals: ["prompt"], ageGroup: ["vocabulary", "prompt"], stages: ["source", "prompt"],
+      access: ["source"], materials: ["source", "visual"], universe: ["visual"],
+    }[key] ?? [];
+    if (key === "readingDeck") {
+      const prior = draft.readingDeck;
+      if (prior?.cards !== value.cards) affected.push("source", "visual", "vocabulary", "prompt");
+      if (prior?.source !== value.source || prior?.references !== value.references) affected.push("source");
+      if (prior?.glossary !== value.glossary) affected.push("vocabulary");
     }
+    setDraft((d) => ({ ...d, [key]: value }));
+    invalidateChecks(affected);
     setDirty(true);
     setError("");
     setMessage("");
@@ -96,11 +108,12 @@ export default function LessonEditor({
   }
   async function save() {
     const valid = validateDraft(draft);
+    if (lesson?.source && reviewStatus === "reviewed") requireReviewChecks(checks);
     const result = await learningRequest(
       lesson ? `/api/admin/lessons/${lesson.id}` : "/api/admin/lessons",
       {
         draft: valid,
-        ...(lesson?.source ? { teacherNotes, sourceReviewed, reviewStatus } : {}),
+        ...(lesson?.source ? { teacherNotes, reviewChecks: checks, reviewStatus } : {}),
         revision: lesson?.revision,
         labId: lesson ? undefined : linkedLabId,
       },
@@ -324,6 +337,7 @@ export default function LessonEditor({
                     value={teacherNotes}
                     onChange={(e) => {
                       setTeacherNotes(e.target.value);
+                      invalidateChecks(["prompt"]);
                       setDirty(true);
                     }}
                   />
@@ -338,27 +352,26 @@ export default function LessonEditor({
                   {lesson.source.license} · 출처와 비영리 이용 조건을
                   유지해주세요. 학습 안내와 질문은 아래에서 수정할 수 있어요.
                 </p>
-                <label className="learning-review-check">
-                  <input
-                    type="checkbox"
-                    checked={sourceReviewed}
-                    onChange={(e) => {
-                      setSourceReviewed(e.target.checked);
-                      setReviewStatus(e.target.checked ? "reviewed" : "pending");
+                <fieldset className="learning-stage-editor">
+                  <legend>검수 체크리스트 · {reviewCount(checks)}/{REVIEW_CHECKS.length}</legend>
+                  {REVIEW_CHECKS.map(({ id, label, detail }) => <label className="learning-review-check" key={id}>
+                    <input type="checkbox" checked={checks[id]} onChange={(e) => {
+                      setChecks((current) => ({ ...current, [id]: e.target.checked }));
+                      if (!e.target.checked && reviewStatus === "reviewed") setReviewStatus("pending");
                       setDirty(true);
-                    }}
-                  />{" "}
-                  학생용 내용·교사용 검수 사항과 출처·이용 조건을 확인했어요.
-                </label>
+                    }} />
+                    <span><strong>{label}</strong> · {detail}</span>
+                  </label>)}
+                  <p className="learning-hint">내용을 수정하면 연결된 항목을 다시 확인하게 돼요.</p>
+                </fieldset>
                 <label>검토 상태
                   <select value={reviewStatus} onChange={(e) => {
                     setReviewStatus(e.target.value);
-                    setSourceReviewed(e.target.value === "reviewed");
                     setDirty(true);
                   }}>
                     <option value="pending">검토 대기</option>
                     <option value="needs_changes">수정 요청 · 교사용 검수 사항에 이유 기록</option>
-                    <option value="reviewed">검토 완료 · 출처와 이용 조건 확인</option>
+                    <option value="reviewed" disabled={reviewCount(checks) < REVIEW_CHECKS.length}>검토 완료</option>
                   </select>
                 </label>
               </section>
@@ -794,6 +807,7 @@ export default function LessonEditor({
                   setDraft(content.readingDeck && source
                     ? { ...content, readingDeck: { ...content.readingDeck, source } }
                     : content);
+                  invalidateChecks(REVIEW_CHECKS.map(({ id }) => id));
                   setDirty(true);
                   setMessage(
                     "이전 발행본을 초안으로 가져왔어요. 확인 후 저장해주세요.",

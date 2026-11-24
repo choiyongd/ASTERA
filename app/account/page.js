@@ -3,9 +3,10 @@ import Link from "next/link";
 import NavBar from "../nav-bar";
 import LogoutButton from "./logout-button";
 import { learningContext, dbCheck, catalogState } from "@/lib/learning/server";
-import { learningAnalytics } from "@/lib/learning/analytics.mjs";
+import { applicationEvidence, learningAnalytics } from "@/lib/learning/analytics.mjs";
 import EmailVerification from "./components/email-verification";
 import LearningCharts from "./components/learning-charts";
+import ApplicationRecords from "./components/application-records";
 import LocalLabRecords from "./local-lab-records";
 import "../learn/learning.css";
 export const dynamic = "force-dynamic";
@@ -99,6 +100,7 @@ export default async function AccountPage() {
           </article>
         </div>
         <LearningCharts analytics={analytics} />
+        <ApplicationRecords entries={applicationEvidence(records)} />
         <section className="learning-panel">
           <div className="learning-toolbar">
             <h2>최근 학습</h2>

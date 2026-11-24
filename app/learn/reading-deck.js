@@ -15,6 +15,7 @@ function VocabularyWord({ term, meaning, active, setActive }) {
   const id = useId();
   const anchor = useRef(null);
   const state = active?.id === id ? active : null;
+  const [definition, example] = meaning.split(" 예문 · ", 2);
 
   useEffect(() => {
     if (!state) return;
@@ -56,7 +57,9 @@ function VocabularyWord({ term, meaning, active, setActive }) {
       >{term}</button>
       <span className="reading-word-tooltip" id={id} role="tooltip" hidden={!state}
         data-side={state?.above ? "above" : "below"} style={{ insetInlineStart: state?.left }}
-      ><strong>{term}</strong><span>{meaning}</span></span>
+      ><strong>{term}</strong><span>{definition}</span>
+        {example && <span className="reading-word-example"><b>예문</b> {example}</span>}
+      </span>
     </span>
   );
 }

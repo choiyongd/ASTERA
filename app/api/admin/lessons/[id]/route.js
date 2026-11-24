@@ -10,6 +10,7 @@ import {
   validateSourcePublication,
 } from "@/lib/learning/stations.mjs";
 import { validateDraft } from "@/lib/learning/domain.mjs";
+import { validateReviewChecks } from "@/lib/learning/review.mjs";
 export async function PATCH(request, { params }) {
   return learningAction(request, async ({ db }) => {
     const { id } = await params;
@@ -49,6 +50,9 @@ export async function PATCH(request, { params }) {
           p_draft: validateDraft(body.draft),
           ...(body.teacherNotes !== undefined
             ? { p_teacher_notes: validateTeacherNotes(body.teacherNotes) }
+            : {}),
+          ...(body.reviewChecks !== undefined
+            ? { p_review_checks: validateReviewChecks(body.reviewChecks) }
             : {}),
           ...(body.reviewStatus !== undefined
             ? { p_review_status: body.reviewStatus }

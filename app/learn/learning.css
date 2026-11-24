@@ -1165,6 +1165,11 @@
 }
 .reading-word-tooltip[data-side="above"] { inset-block: auto 100%; }
 .reading-word-tooltip strong { display: block; color: var(--navy); }
+.reading-word-example { display: block; margin-top: 6px; padding-top: 5px; border-top: 1px solid var(--line); }
+.reading-word-example b { color: var(--navy-2); }
+.learning-application-record { white-space: pre-wrap; overflow-wrap: anywhere; }
+.learning-application-evidence details + details { border-top: 1px solid var(--line); }
+.learning-application-evidence summary { color: var(--navy); padding: 10px 0; cursor: pointer; }
 .reading-diagram { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; list-style: none; padding: 0; margin: 18px 0; }
 .reading-diagram li { position: relative; display: grid; grid-template-columns: 30px minmax(0, 1fr); align-items: start; gap: 10px; padding: 14px; border-radius: 12px; background: var(--bg); border: 1px solid var(--line); }
 .reading-diagram li:nth-child(even) { background: color-mix(in srgb, var(--gold-soft) 22%, var(--card)); border-color: var(--gold-soft); }
