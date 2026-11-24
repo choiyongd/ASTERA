@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ACCESS } from "@/lib/learning/domain.mjs";
+import { REVIEW_CHECKS } from "@/lib/learning/review.mjs";
 export default function LessonList({ items }) {
   const [query, setQuery] = useState(""),
     [category, setCategory] = useState(""),
@@ -16,7 +17,7 @@ export default function LessonList({ items }) {
         setQuery(typeof saved.query === "string" ? saved.query : "");
         setCategory(typeof saved.category === "string" ? saved.category : "");
         setStatus(["", "draft", "published"].includes(saved.status) ? saved.status : "");
-        setReview(["", "pending", "needs_changes", "reviewed", "incomplete", "missing"].includes(saved.review) ? saved.review : "");
+        setReview(["", "pending", "needs_changes", "reviewed", "incomplete", "missing", "unchecked"].includes(saved.review) ? saved.review : "");
         setPage(Number.isInteger(saved.page) && saved.page >= 0 ? saved.page : 0);
       }
     } catch {}
@@ -31,7 +32,8 @@ export default function LessonList({ items }) {
     (i) =>
       (!category || i.category === category) &&
       (!status || (status === "published" ? i.version : !i.version)) &&
-      (!review || (review === "incomplete" ? i.incomplete : review === "missing" ? !i.materialCount : i.reviewStatus === review)) &&
+      (!review || (review === "incomplete" ? i.incomplete : review === "missing" ? !i.materialCount :
+        review === "unchecked" ? i.source && i.checksDone < REVIEW_CHECKS.length : i.reviewStatus === review)) &&
       `${i.title} ${i.stationId || ""}`
         .toLocaleLowerCase()
         .includes(query.trim().toLocaleLowerCase()),
@@ -61,6 +63,7 @@ export default function LessonList({ items }) {
             <option value="pending">검토 대기</option>
             <option value="needs_changes">수정 요청</option>
             <option value="reviewed">검토 완료</option>
+            <option value="unchecked">체크리스트 미완료</option>
             <option value="incomplete">학습 문안 미완성</option>
             <option value="missing">연결 자료 없음</option>
           </select>
@@ -121,7 +124,7 @@ export default function LessonList({ items }) {
                     {i.version ? `발행 v${i.version}` : "비공개 초안"}
                   </span>
                   {i.source && (
-                    <small>{i.reviewStatus === "needs_changes" ? "수정 요청" : i.reviewed ? "검토 완료" : "검토 대기"}</small>
+                    <small>{i.reviewStatus === "needs_changes" ? "수정 요청" : i.reviewed ? "검토 완료" : "검토 대기"} · {i.checksDone}/{REVIEW_CHECKS.length} 확인</small>
                   )}
                 </td>
                 <td>

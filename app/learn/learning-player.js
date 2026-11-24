@@ -396,6 +396,10 @@ export default function LearningPlayer({
                       <div className="learning-prose">{reading.extra}</div>
                     </details>
                   )}
+                  {current.id === "apply" && splitAnswer(record.answers.explore).main.trim() && <details className="learning-extra-reading">
+                    <summary>탐색에서 남긴 내 답 다시 보기</summary>
+                    <p className="learning-prose">{splitAnswer(record.answers.explore).main}</p>
+                  </details>}
                   <div className="learning-materials">
                     {materials
                       .filter((m) => m.stage === record.step)
